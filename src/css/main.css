@@ -1,0 +1,71 @@
+/* Base Colors */
+:root {
+  --color-primary: #1e3a8a; /* Corporate blue */
+  --color-secondary: #a8dadc; /* Pastel contrasting color */
+  --color-bold: #8b1e3f; /* Muted dark red, slightly pastel */
+  --background-main-section: #f5f7fa; /* Light industrial gray-blue */
+  --text-color: #1f2937; /* Dark gray for readability */
+}
+
+/* Global Reset */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  color: var(--text-color);
+  background-color: white;
+}
+
+/* Heading Styles */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.5px;
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  border-bottom: 2px solid var(--color-secondary);
+  padding-bottom: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+h3, h4, h5, h6 {
+  color: #333;
+  font-weight: 500;
+  font-size: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+/* Bold Tag Styling */
+strong {
+  color: var(--color-bold);
+  font-weight: 600;
+}
+
+/* Main Section Styling */
+.main-section {
+  background-color: var(--background-main-section) !important;
+  padding: 2rem !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Center GIF Output */
+.gif-output {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 2rem 0 !important;
+  text-align: center !important;
+}
+
+label {
+  font-size: 1.05rem; /* Slightly bigger than normal */
+  color: var(--color-bold); /* Use the soft bold red */
+  opacity: 0.85; /* Less transparent for better readability */
+  font-weight: 500;
+}

@@ -18,7 +18,6 @@ def change_name_select(state):
 
 with tgb.Page() as uuid_page:
     tgb.text("## UUID Generator", mode="md")
-    tgb.html("hr")
 
     with tgb.layout("1 1 1"):
         tgb.toggle(
@@ -27,6 +26,6 @@ with tgb.Page() as uuid_page:
             on_change=change_name_select,
         )
         tgb.input("{name_for_uuid}", label="Name for UUID", active="{select_name}")
-        tgb.button(label="Get UUID!", on_action=select_uuid)
+        tgb.button(label="Get UUID!", on_action=select_uuid, class_name="plain")
 
     tgb.text("## {selected_uuid}", mode="md")

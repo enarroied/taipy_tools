@@ -9,6 +9,8 @@ tool_pages = {
     "video_to_gif": video_gif_page,
 }
 
+stylekit = {"color_primary": "#1e3a8a", "color_secondary": "#a8dadc"}
+
 if __name__ == "__main__":
 
     # uuid page:
@@ -31,5 +33,7 @@ if __name__ == "__main__":
     gif_is_ready = False
     content_download = None
 
-    gui = Gui(pages=tool_pages)
-    gui.run(title="Taipy 🛠️ Tools", dark_mode=False, use_reloader=True)
+    gui = Gui(pages=tool_pages, css_file="./css/main.css")
+    gui.run(
+        title="Taipy 🛠️ Tools", dark_mode=False, stylekit=stylekit, use_reloader=True
+    )
