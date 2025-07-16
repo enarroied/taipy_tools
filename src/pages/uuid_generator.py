@@ -18,6 +18,7 @@ def change_name_select(state):
 
 with tgb.Page() as uuid_page:
     tgb.text("## UUID Generator", mode="md")
+    tgb.html("hr")
 
     with tgb.layout("1 1 1"):
         tgb.toggle(
