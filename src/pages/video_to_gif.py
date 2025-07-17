@@ -45,7 +45,7 @@ with tgb.Page() as video_gif_page:
 
         with tgb.part(render="{gif_is_ready}"):
             tgb.text("### Convert to GIF:", mode="md")
-            with tgb.part(class_name="gif-output"):
+            with tgb.part(class_name="image-output"):
                 tgb.image("{content_download}", height="200px", class_name="gif-output")
             tgb.file_download(
                 "{content_download}",

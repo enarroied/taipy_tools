@@ -7,6 +7,7 @@ tool_pages = {
     "/": root,
     "uuid_generator": uuid_page,
     "video_to_gif": video_gif_page,
+    "QR_code_generator": qr_code_page,
 }
 
 stylekit = {"color_primary": "#1e3a8a", "color_secondary": "#a8dadc"}
@@ -32,6 +33,16 @@ if __name__ == "__main__":
     video_duration = 0
     gif_is_ready = False
     content_download = None
+
+    # QR Code page
+    qr_code_input = ""
+    transparent_background = False
+    dark_color = "black"
+    light_color = "white"
+    add_logo = True
+    qr_scale = 8
+    qr_border = 4
+    image_path = None
 
     gui = Gui(pages=tool_pages, css_file="./css/main.css")
     gui.run(

@@ -55,7 +55,7 @@ strong {
 }
 
 /* Center GIF Output */
-.gif-output {
+.image-output {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
