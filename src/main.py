@@ -46,5 +46,9 @@ if __name__ == "__main__":
 
     gui = Gui(pages=tool_pages, css_file="./css/main.css")
     gui.run(
-        title="Taipy 🛠️ Tools", dark_mode=False, stylekit=stylekit, use_reloader=True
+        title="Taipy 🛠️ Tools",
+        favicon="./img/logo.png",
+        dark_mode=False,
+        stylekit=stylekit,
+        use_reloader=True,
     )
