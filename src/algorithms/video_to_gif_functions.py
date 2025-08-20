@@ -1,11 +1,10 @@
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
-from moviepy import VideoFileClip, video
+from moviepy import VideoFileClip
+
 
 # Helper functions
-
-
 def _clip_file(clip, duration, start_time):
     if duration is not None:
         clip = clip.subclipped(start_time, start_time + duration)

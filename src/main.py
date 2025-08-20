@@ -1,7 +1,6 @@
 from pages import *
 
 from taipy.gui import Gui
-from taipy.gui import builder as tgb
 
 tool_pages = {
     "/": root,
