@@ -1,2 +1,9 @@
 __pycache__/
 .taipy
+
+.venv
+.python-version
+
+*.egg-info
+dist/
+build/
