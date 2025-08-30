@@ -3,7 +3,7 @@ from algorithms.video_to_gif_state_functions import convert_to_gif, select_video
 import taipy.gui.builder as tgb
 
 with tgb.Page() as video_gif_page:
-    tgb.text("## Video to **Gif** Converter", mode="md")
+    tgb.text("## Video to **GIF** Converter", mode="md")
     with tgb.part(class_name="main-section"):
         with tgb.part():
             tgb.text("### **Upload** Video:", mode="md")
