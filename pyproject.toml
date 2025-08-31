@@ -1,0 +1,12 @@
+[project]
+name = "taipy-tools"
+version = "0.1.0"
+description = "Taipy application with small tools such as a UUID generator, a QR Code generator and a video to GIF converter."
+readme = "README.md"
+requires-python = ">=3.12, <3.13"
+dependencies = [
+    "moviepy==2.2.1",
+    "segno==1.6.6",
+    "taipy==4.1.0",
+    "uuid-utils==0.11.0",
+]

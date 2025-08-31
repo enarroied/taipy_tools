@@ -10,6 +10,9 @@
     - [UUID Generator](#uuid-generator)
     - [Video to GIF](#video-to-gif)
     - [QR Code Generator](#qr-code-generator)
+  - [Running Taipy Tools](#running-taipy-tools)
+    - [Run Locally](#run-locally)
+    - [Run with Docker](#run-with-docker)
 
 This repo is a multiple-tab app, created with Taipy.
 
@@ -70,3 +73,65 @@ The QR code generator uses [Segno](https://segno.readthedocs.io/en/latest/), **a
 There you have it:
 
 ![](./img/qr_codes.gif)
+
+## Running Taipy Tools
+
+You can run this application either **locally** or inside a **Docker container**.
+
+⚠️ Note: The provided Dockerfile is **not production-grade**: it runs on Taipy’s default Flask server.  
+In the future, this can be adapted to use a more robust WSGI server (e.g. Gunicorn).
+
+---
+
+### Run Locally
+
+To run locally, you can use [`uv`](https://docs.astral.sh/uv/) to create a virtual environment and install dependencies from `pyproject.toml`:
+
+```bash
+uv venv
+uv pip install -r pyproject.toml
+```
+
+Then run the app:
+
+```bash
+cd src
+python main.py
+```
+
+Or, from the project root, directly with uv:
+
+```bash
+uv run --directory src main.py
+```
+
+
+### Run with Docker
+
+Build the Docker image:
+
+```bash
+docker build -t taipytools .
+```
+
+Run the container (mapping port 5000):
+
+```bash
+docker run -p 5000:5000 taipytools
+```
+
+You can then access the app at: http://localhost:5000
+
+**The Dockerfile:**
+
+- Uses Python 3.12 (Debian 12 slim) as the base.
+- Installs uv.
+- Copies pyproject.toml and uv.lock and installs dependencies at build time (not at runtime).
+- Runs as a non-root user (appuser) for better security.
+- Exposes port 5000 (default Taipy/Flask port).
+- Defines a healthcheck so Docker can monitor container health.
+- Runs the app with:
+
+  ```bash
+  taipy run --no-debug --no-reloader main.py -H 0.0.0.0 -P 5000
+  ```
