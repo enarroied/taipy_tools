@@ -26,11 +26,10 @@ def _process_clip(clip, input_path, duration, start_time, resize_factor, fps):
     return clip
 
 
-def _is_input_file_missing(input_path):
+def _validate_input_file(input_path):
     input_file = Path(input_path)
     if not input_file.is_file():
-        print(f"Error: Input file '{input_path}' not found.")
-        return True
+        raise FileNotFoundError(f"Input file '{input_path}' not found.")
 
 
 def _create_dir_if_not_exist(output_path):
@@ -60,8 +59,7 @@ def video_to_gif(
     resize_factor: float = 1.0,
 ) -> bool:
     try:
-        if _is_input_file_missing(input_path):
-            return False
+        _validate_input_file(input_path)
         _create_dir_if_not_exist(output_path)
 
         with VideoFileClip(input_path) as clip:
