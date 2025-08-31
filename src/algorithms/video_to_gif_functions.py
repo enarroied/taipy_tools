@@ -5,11 +5,10 @@ from moviepy import VideoFileClip
 
 
 def _clip_file(clip, duration, start_time):
-    if duration is not None:
-        clip = clip.subclipped(start_time, start_time + duration)
+    if duration is None:
+        return clip.subclipped(start_time)
     else:
-        clip = clip.subclipped(start_time)
-    return clip
+        return clip.subclipped(start_time, start_time + duration)
 
 
 def _resize_clip(clip, resize_factor):
