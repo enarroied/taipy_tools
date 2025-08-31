@@ -38,54 +38,35 @@ def _clean_parameters(state):
         s.file_name = " - "
 
 
-def video_is_too_long(state, video_duration):
-    if video_duration > 60:
-        with state as s:
-            _clean_parameters(s)
-            notify(
-                s, "error", f"Video Should not exceed 60s, duration is {video_duration}"
-            )
-        return True
-
-
 def select_video(state):
     with state as s:
         s.content_path = Path(s.content)
         s.gif_is_ready = False
         s.video_duration = get_clip_duration(s.content)
-        if video_is_too_long(s, s.video_duration):
-            return
         s.file_size = _calculate_file_size(s.content_path)
         s.video_is_selected = True
         s.file_name = s.content_path.name
 
 
-def _check_and_notify(state, condition, message):
-    if condition:
-        notify(state, "e", message)
-        return True
-    return False
-
-
 def _parameters_are_wrong(state):
+    """
+    Checks for invalid video parameters and notifies the user.
+    Returns True if any parameters are wrong, otherwise False.
+    """
     with state as s:
-        return (
-            _check_and_notify(
+        if s.duration > s.video_duration:
+            notify(s, "e", "Duration shouldn't be longer than total file duration.")
+            return True
+        elif s.start_time > s.video_duration:
+            notify(s, "e", "Start Time shouldn't be after video ends!")
+            return True
+        elif (s.duration + s.start_time) > s.video_duration:
+            notify(
                 s,
-                s.duration > s.video_duration,
-                "Duration shouldn't be longer than total file duration",
+                "e",
+                "Duration + Start Time can't be longer than total file duration.",
             )
-            or _check_and_notify(
-                s,
-                s.start_time > s.video_duration,
-                "Start Time shouldn't be after video ends!",
-            )
-            or _check_and_notify(
-                s,
-                s.duration + s.start_time > s.video_duration,
-                "Duration + Start Time can't be longer than total file duration",
-            )
-        )
+            return True
 
 
 def _assert_gif_ready(state, file_output_name):
@@ -110,4 +91,4 @@ def convert_to_gif(state):
             resize_factor=s.resize_factor,
         ):
             _assert_gif_ready(s, file_output_name)
-        resume_control(s)
+    resume_control(state)
