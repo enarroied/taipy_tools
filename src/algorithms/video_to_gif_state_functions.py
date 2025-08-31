@@ -24,7 +24,7 @@ def _calculate_file_size(content_path):
         else:
             return f"{size_bytes / (1024 ** 3):.2f} GB"
     else:
-        return " - "  # For display as None but as string
+        return " - "
 
 
 def _clean_parameters(state):
