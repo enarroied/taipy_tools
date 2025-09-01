@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional, Tuple
 
 import uuid_utils as uuid
 from algorithms.video_to_gif_functions import get_clip_duration, video_to_gif
@@ -13,26 +12,24 @@ def _delete_file(content_path):
 
 
 def _calculate_file_size(content_path):
-    if content_path.is_file():
-        size_bytes = content_path.stat().st_size
-        if size_bytes < 1024:
-            return f"{size_bytes} B"
-        elif size_bytes < 1024**2:
-            return f"{size_bytes / 1024:.2f} KB"
-        elif size_bytes < 1024**3:
-            return f"{size_bytes / (1024 ** 2):.2f} MB"
-        else:
-            return f"{size_bytes / (1024 ** 3):.2f} GB"
-    else:
+    if not content_path.is_file():
         return " - "
+    size_bytes = content_path.stat().st_size
+    thresholds = [(1024**3, "GB"), (1024**2, "MB"), (1024, "KB"), (0, "B")]
+
+    for factor, suffix in thresholds:
+        if size_bytes >= factor:
+            if factor == 0:
+                return f"{size_bytes} {suffix}"
+            return f"{size_bytes / factor:.2f} {suffix}"
 
 
 def _clean_parameters(state):
     with state as s:
         s.video_duration = 0
         _delete_file(s.content_path)
-        s.content_path = None
-        s.content = None
+        s.content_path = ""
+        s.content = ""
         s.video_is_selected = False
         s.file_size = " - "  # For display as None but as string
         s.file_name = " - "
@@ -49,24 +46,26 @@ def select_video(state):
 
 
 def _parameters_are_wrong(state):
-    """
-    Checks for invalid video parameters and notifies the user.
-    Returns True if any parameters are wrong, otherwise False.
-    """
     with state as s:
-        if s.duration > s.video_duration:
-            notify(s, "e", "Duration shouldn't be longer than total file duration.")
-            return True
-        elif s.start_time > s.video_duration:
-            notify(s, "e", "Start Time shouldn't be after video ends!")
-            return True
-        elif (s.duration + s.start_time) > s.video_duration:
-            notify(
-                s,
-                "e",
+        checks = [
+            (
+                s.duration > s.video_duration,
+                "Duration shouldn't be longer than total file duration.",
+            ),
+            (
+                s.start_time > s.video_duration,
+                "Start Time shouldn't be after video ends!",
+            ),
+            (
+                (s.duration + s.start_time) > s.video_duration,
                 "Duration + Start Time can't be longer than total file duration.",
-            )
-            return True
+            ),
+        ]
+        for condition, message in checks:
+            if condition:
+                notify(s, "e", message)
+                return True
+    return False
 
 
 def _assert_gif_ready(state, file_output_name):
@@ -91,4 +90,5 @@ def convert_to_gif(state):
             resize_factor=s.resize_factor,
         ):
             _assert_gif_ready(s, file_output_name)
+    _clean_parameters(state)
     resume_control(state)
