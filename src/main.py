@@ -49,5 +49,5 @@ if __name__ == "__main__":
         favicon="./img/logo.png",
         dark_mode=False,
         stylekit=stylekit,
-        # use_reloader=True,
+        use_reloader=True,
     )

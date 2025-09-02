@@ -20,30 +20,30 @@ The goal is to show how you can use Taipy in enterprise environments to create s
 
 This is how the tabs look for the three main mini-apps: A UUID generator, a Video to GIF converter, and a QR Code generator:
 
-![](./img/taipy_tools.gif)
+![GIF Screen recording of Taipy Tools](./img/taipy_tools.gif)
 
 ## Why Taipy 🛠️ Tools?
 
 Creating small enterprise apps has several advantages:
 
-* It allows **customization**, such as including company logos, corporate colors or any other distinctive corporate style (image, for your company's QR Codes)
-* It keeps data inside the company. Sure, there are plenty of GIF generators online, but do you want your employees uploading internal screenshots to random sites?
-* Your company may have some small but specific tasks that users could perform with a small Python function: You can bring it to users with Taipy.
-* You can integrate your mini-apps with in-house tools or databases. (I'll be showing more apps built in that style in other projects).
+- It allows **customization**, such as including company logos, corporate colors or any other distinctive corporate style (image, for your company's QR Codes)
+- It keeps data inside the company. Sure, there are plenty of GIF generators online, but do you want your employees uploading internal screenshots to random sites?
+- Your company may have some small but specific tasks that users could perform with a small Python function: You can bring it to users with Taipy.
+- You can integrate your mini-apps with in-house tools or databases. (I'll be showing more apps built in that style in other projects).
 
 Now, Taipy is mainly a data application builder. Examples of typical data apps include:
 
-* Dashboards
-* Optimization apps
-* Forcasting (Machine Leanrning) apps
-* AI apps...
+- Dashboards
+- Optimization apps
+- Forcasting (Machine Leanrning) apps
+- AI apps...
 
-**The apps I listed here aren't data apps**. So why use Taipy for this type of thing?
+**The apps I listed here aren't data apps**, so why use Taipy for this?
 
-* Big companies often restrict the number of tools employees can use. Taipy’s main use case isn’t building these utility-style apps... but the fact that you can do it, and deploy them easily in production, is a real plus.
-* Taipy is designed to speed up (and even make possible) the creation of data apps by professionals who use Python. But Python’s not just for "data people" anymore. I made these apps quickly, and they could go into production with minimal effort. In corporate environments where dev processes often turn into a bottlenecked, endless black hole: this is a real, practical use case.
-Using a simple app generator like Taipy can streamline those processes significantly.
-* And well, I had lots of fun doing this 😃!
+- Big companies often restrict the number of tools employees can use. Taipy’s main use case isn’t building these utility-style apps... but the fact that you can do it, and deploy them in production, is a real plus.
+- Taipy is designed to speed up (and even make possible) the creation of data apps by professionals who use Python. But Python’s not just for "data people" anymore. I made these apps fast, and they can go into production with minimal effort. In corporate environments where dev processes often turn into a bottlenecked, endless black hole: this is a real, practical use case.
+Using a simple app generator like Taipy can streamline those processes a lot... It can be the difference between a project that happens, and a project that doesn't.
+- And well, I had lots of fun doing this 😃!
 
 ## Available Applications
 
@@ -51,20 +51,19 @@ These are the tools included in Taipy 🛠️ Tools, I may add more as it goes (
 
 ### UUID Generator
 
-Uses the [uuid-utils](https://github.com/aminalaee/uuid-utils), which is faster than the `uuid` native Python library. The reason is because i**t provides a unified API for all UUID types**. The app omits UUID type 8 (and type 2, but one isn't in use, and the APIs don't provide it either).
+Uses the [uuid-utils](https://github.com/aminalaee/uuid-utils), which is faster than the `uuid` native Python library. The reason is because **it provides a unified API for all UUID types**. The app omits UUID type 8 (and type 2, but one isn't in use, and the APIs don't provide it either).
 
 This library is also about 10 times faster than the native `uuid` library, but for an app like this one, where it generates one UUID at a time, the performance gain is unsignificant (I still encourage you to take a look at the prock if you use UUIDs).
 
-![](./img/uuid.gif)
+![GIF Screen recording of the UUID generator](./img/uuid.gif)
 
 ### Video to GIF
 
-This generates GIF images from Videos. It uses [MoviePy](https://zulko.github.io/moviepy/).
-It's not really optimized (GIF outputs are really big).
+This generates GIF images from Videos. It uses [ffmpeg-python](https://pypi.org/project/ffmpeg-python/).
 
-I may have to make some changes, but MoviePy's API changed recently and the documentation doesn't seem all the way up to date. This is a library I'm currently tring to learn, and most of the code in this app comes from a chatbot. 
+An earlier version of this app used moviepy, but ffmepg is faster and is better choice for this small application. Most of the code for the video to GIF converter comes from a chatbot.
 
-![](./img/video_to_gif.gif)
+![GIF Screen recording of the video to GIF app](./img/video_to_gif.gif)
 
 ### QR Code Generator
 
@@ -72,14 +71,14 @@ The QR code generator uses [Segno](https://segno.readthedocs.io/en/latest/), **a
 
 There you have it:
 
-![](./img/qr_codes.gif)
+![GIF Screen recording of the QR Code generator](./img/qr_codes.gif)
 
 ## Running Taipy Tools
 
 You can run this application either **locally** or inside a **Docker container**.
 
-⚠️ Note: The provided Dockerfile is **not production-grade**: it runs on Taipy’s default Flask server.  
-In the future, this can be adapted to use a more robust WSGI server (e.g. Gunicorn).
+⚠️ Note: The provided code is **not production-grade**: it runs on Taipy’s default Flask server.  
+In the future, I may adapt this to use a more robust WSGI server (e.g. Gunicorn).
 
 ---
 
@@ -104,7 +103,6 @@ Or, from the project root, directly with uv:
 ```bash
 uv run --directory src main.py
 ```
-
 
 ### Run with Docker
 

@@ -1,11 +1,15 @@
-# Dockerfile to create an image thar runs taipy-tools
+# Dockerfile to create an image that runs taipy-tools
 # This is NOT a production-grade dockerfile and uses taipy's (flask)
 # default server.
 # This dockerfile uses uv to install and run the application.
 FROM python:3.12-slim-bookworm
 
+# Install system dependencies including ffmpeg for the video converter
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
+    && apt-get install -y --no-install-recommends \
+        curl \
+        xz-utils \
+        ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
