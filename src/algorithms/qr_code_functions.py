@@ -30,9 +30,8 @@ def create_qr_code(
     Returns:
         str: Path to the generated QR code image
     """
-    qr = _create_base_qr(data)
+    qr = segno.make(data, error="H")
 
-    # If no center image, save directly
     if not center_image_path or not Path(center_image_path).exists():
         _save_qr_direct(
             qr,
@@ -45,10 +44,8 @@ def create_qr_code(
         )
         return output_path
 
-    # if Needs center image
     temp_path = Path("temp_qr.png")
     try:
-        # Save QR to temp file
         _save_qr_to_temp(
             qr,
             temp_path,
@@ -67,16 +64,9 @@ def create_qr_code(
 
         final_img = _add_center_image(qr_img, center_img)
         final_img.save(output_path)
-
     finally:
         _cleanup_temp_file(temp_path)
-
     return output_path
-
-
-def _create_base_qr(data):
-    """Create base QR code with high error correction."""
-    return segno.make(data, error="H")
 
 
 def _save_qr_direct(
@@ -102,9 +92,7 @@ def _prepare_center_image(center_image_path, qr_size):
         center_img = center_img.convert("RGBA")
     qr_width, qr_height = qr_size
     center_size = min(qr_width, qr_height) // 5
-    center_img = center_img.resize((center_size, center_size), Image.Resampling.LANCZOS)
-
-    return center_img
+    return center_img.resize((center_size, center_size), Image.Resampling.LANCZOS)
 
 
 def _add_center_image(qr_img, center_img):
@@ -129,6 +117,6 @@ def _calculate_center_position(qr_size, center_size):
 
 
 def _cleanup_temp_file(temp_path):
-    """Clean up temporary file using pathlib."""
+    """Clean up temporary file."""
     if temp_path.exists():
         temp_path.unlink()
