@@ -1,6 +1,6 @@
-from pages import *
-
 from taipy.gui import Gui
+
+from pages import qr_code_page, root, uuid_page, video_gif_page
 
 tool_pages = {
     "/": root,
@@ -12,7 +12,6 @@ tool_pages = {
 stylekit = {"color_primary": "#1e3a8a", "color_secondary": "#a8dadc"}
 
 if __name__ == "__main__":
-
     # uuid page:
     uuid_type = "1"
     selected_uuid = ""

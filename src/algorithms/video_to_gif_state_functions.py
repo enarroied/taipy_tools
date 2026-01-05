@@ -1,9 +1,9 @@
 from pathlib import Path
 
 import uuid_utils as uuid
-from algorithms.video_to_gif_functions import get_clip_duration, video_to_gif
-
 from taipy.gui import hold_control, notify, resume_control
+
+from algorithms.video_to_gif_functions import get_clip_duration, video_to_gif
 
 
 def _delete_file(content_path):

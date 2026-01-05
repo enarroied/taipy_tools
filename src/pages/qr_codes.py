@@ -1,8 +1,8 @@
-import uuid_utils as uuid
-from algorithms.qr_code_functions import create_qr_code
-
 import taipy.gui.builder as tgb
+import uuid_utils as uuid
 from taipy.gui import notify
+
+from algorithms.qr_code_functions import create_qr_code
 
 
 def make_qr_code(state):

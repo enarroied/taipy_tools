@@ -1,6 +1,6 @@
-from algorithms.uuid_functions import get_uuid
-
 import taipy.gui.builder as tgb
+
+from algorithms.uuid_functions import get_uuid
 
 
 def select_uuid(state):

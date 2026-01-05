@@ -1,6 +1,6 @@
-from algorithms.video_to_gif_state_functions import convert_to_gif, select_video
-
 import taipy.gui.builder as tgb
+
+from algorithms.video_to_gif_state_functions import convert_to_gif, select_video
 
 with tgb.Page() as video_gif_page:
     tgb.text("## Video to **GIF** Converter", mode="md")

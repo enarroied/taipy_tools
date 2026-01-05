@@ -23,7 +23,8 @@ def create_qr_code(
         center_image_path (str, optional): Path to image to place in center of QR code
         dark_color (str): Color for dark areas (default: "black")
         light_color (str): Color for light areas (default: "white")
-        transparent_background (bool): If True, background will be transparent (default: False)
+        transparent_background (bool): If True, background will be transparent
+            (default: False)
         scale (int): Scale factor for QR code size (default: 8)
         border (int): Border size around QR code (default: 4)
 

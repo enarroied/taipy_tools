@@ -13,7 +13,8 @@ def get_clip_duration(input_path: str) -> float:
         return duration
     except ffmpeg.Error as e:
         raise ValueError(
-            f"ffprobe error: Could not get duration for '{input_path}'. {e.stderr.decode('utf8')}"
+            f"ffprobe error: Could not get duration for '{input_path}'.\
+                  {e.stderr.decode('utf8')}"
         ) from e
     except (FileNotFoundError, KeyError) as e:
         raise ValueError(
@@ -41,7 +42,8 @@ def _get_clip_info(input_path: str):
         return {"duration": duration, "size": (width, height)}
     except ffmpeg.Error as e:
         raise ValueError(
-            f"ffprobe error: Could not get info for '{input_path}'. {e.stderr.decode('utf8')}"
+            f"ffprobe error: Could not get info for '{input_path}'.\
+                  {e.stderr.decode('utf8')}"
         )
     except (FileNotFoundError, KeyError) as e:
         raise ValueError(f"Could not get video info. Is '{input_path}' valid?") from e
