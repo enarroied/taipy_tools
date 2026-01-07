@@ -6,6 +6,7 @@ from PIL import Image
 from src.algorithms.qr_code_functions import (
     _add_center_image,
     _calculate_center_position,
+    _center,
     _cleanup_temp_file,
     _prepare_center_image,
     create_qr_code,
@@ -132,6 +133,22 @@ class TestCustomStyling:
         assert qr_output_path.exists()
 
 
+class TestCenter:
+    """Test the _center utility function."""
+
+    def test_center_calculates_correctly(self):
+        """Test center calculation with simple values."""
+        assert _center(100, 50) == 25
+
+    def test_center_equal_dimensions(self):
+        """Test centering when dimensions are equal."""
+        assert _center(100, 100) == 0
+
+    def test_center_small_inner(self):
+        """Test centering with small inner dimension."""
+        assert _center(200, 50) == 75
+
+
 class TestCalculateCenterPosition:
     """Test center position calculation."""
 
@@ -149,6 +166,21 @@ class TestCalculateCenterPosition:
         """Test that function returns a tuple."""
         pos = _calculate_center_position((100, 100), (10, 10))
         assert isinstance(pos, tuple)
+
+    def test_raises_when_center_too_wide(self):
+        """Test error when center image is too wide."""
+        with pytest.raises(ValueError, match="too large"):
+            _calculate_center_position((100, 100), (150, 50))
+
+    def test_raises_when_center_too_tall(self):
+        """Test error when center image is too tall."""
+        with pytest.raises(ValueError, match="too large"):
+            _calculate_center_position((100, 100), (50, 150))
+
+    def test_raises_when_center_too_large_both(self):
+        """Test error when center image is too large in both dimensions."""
+        with pytest.raises(ValueError, match="too large"):
+            _calculate_center_position((100, 100), (150, 150))
 
 
 class TestPrepareCenterImage:

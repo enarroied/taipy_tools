@@ -111,10 +111,17 @@ def _calculate_center_position(qr_size, center_size):
     qr_width, qr_height = qr_size
     center_width, center_height = center_size
 
-    center_x = (qr_width - center_width) // 2
-    center_y = (qr_height - center_height) // 2
+    if center_width > qr_width or center_height > qr_height:
+        raise ValueError("Center image too large for QR code")
+
+    center_x = _center(qr_width, center_width)
+    center_y = _center(qr_height, center_height)
 
     return (center_x, center_y)
+
+
+def _center(outer_dimension, inner_dimension):
+    return (outer_dimension - inner_dimension) // 2
 
 
 def _cleanup_temp_file(temp_path):
