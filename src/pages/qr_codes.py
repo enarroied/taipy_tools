@@ -1,29 +1,54 @@
 import taipy.gui.builder as tgb
 import uuid_utils as uuid
-from taipy.gui import notify
 
 from algorithms.qr_code_functions import create_qr_code
+from taipy_utilities.taipy_callback import taipy_callback
 
 
-def make_qr_code(state):
-    with state as s:
-        message = s.qr_code_input
-        if len(message) > 1500:
-            notify(s, "e", "Text too long")
-            return
-        file_output_name = f"./deposit_files/{uuid.uuid4()}.png"
-        image_path = "./img/logo.png" if s.add_logo else None
-        create_qr_code(
-            data=message,
-            output_path=file_output_name,
-            center_image_path=image_path,
-            dark_color=s.dark_color,
-            light_color=s.light_color,
-            transparent_background=s.transparent_background,
-            scale=s.qr_scale,
-            border=s.qr_border,
-        )
-        s.image_path = file_output_name
+def generate_qr_code(
+    message: str,
+    add_logo: bool,
+    dark_color: str,
+    light_color: str,
+    transparent_background: bool,
+    qr_scale: int,
+    qr_border: int,
+) -> str:
+    """Pure business logic - raises standard exceptions"""
+    if len(message) > 1500:
+        raise ValueError("Text too long")  # Standard Python!
+
+    if not message.strip():
+        raise ValueError("Message cannot be empty")  # Standard Python!
+
+    file_output_name = f"./deposit_files/{uuid.uuid4()}.png"
+    image_path = "./img/logo.png" if add_logo else None
+
+    create_qr_code(
+        data=message,
+        output_path=file_output_name,
+        center_image_path=image_path,
+        dark_color=dark_color,
+        light_color=light_color,
+        transparent_background=transparent_background,
+        scale=qr_scale,
+        border=qr_border,
+    )
+
+    return file_output_name
+
+
+@taipy_callback
+def make_qr_code(s):
+    s.image_path = generate_qr_code(
+        message=s.qr_code_input,
+        add_logo=s.add_logo,
+        dark_color=s.dark_color,
+        light_color=s.light_color,
+        transparent_background=s.transparent_background,
+        qr_scale=s.qr_scale,
+        qr_border=s.qr_border,
+    )
 
 
 with tgb.Page() as qr_code_page:
