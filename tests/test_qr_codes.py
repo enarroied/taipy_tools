@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from PIL import Image
@@ -10,6 +11,7 @@ from src.algorithms.qr_code_functions import (
     _cleanup_temp_file,
     _prepare_center_image,
     create_qr_code,
+    generate_qr_code,
 )
 
 
@@ -54,6 +56,44 @@ class TestBasicQRCreation:
             assert Path(result).exists()
         finally:
             Path(result).unlink()
+
+    def test_generate_qr_code_success(self):
+        with patch("src.algorithms.qr_code_functions.create_qr_code"):
+            result = generate_qr_code(
+                message="Test message",
+                add_logo=True,
+                dark_color="#000",
+                light_color="#FFF",
+                transparent_background=False,
+                qr_scale=10,
+                qr_border=4,
+            )
+            assert result.startswith("./deposit_files/")
+            assert result.endswith(".png")
+
+    def test_generate_qr_code_text_too_long(self):
+        with pytest.raises(ValueError, match="Text too long"):
+            generate_qr_code(
+                message="x" * 1501,
+                add_logo=False,
+                dark_color="#000",
+                light_color="#FFF",
+                transparent_background=False,
+                qr_scale=10,
+                qr_border=4,
+            )
+
+    def test_generate_qr_code_empty_message(self):
+        with pytest.raises(ValueError, match="Message cannot be empty"):
+            generate_qr_code(
+                message="   ",  # Just whitespace
+                add_logo=False,
+                dark_color="#000",
+                light_color="#FFF",
+                transparent_background=False,
+                qr_scale=10,
+                qr_border=4,
+            )
 
 
 class TestQRWithCenterImage:

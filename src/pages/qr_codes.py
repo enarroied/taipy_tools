@@ -1,41 +1,7 @@
 import taipy.gui.builder as tgb
-import uuid_utils as uuid
 
-from algorithms.qr_code_functions import create_qr_code
+from algorithms.qr_code_functions import generate_qr_code
 from taipy_utilities.taipy_callback import taipy_callback
-
-
-def generate_qr_code(
-    message: str,
-    add_logo: bool,
-    dark_color: str,
-    light_color: str,
-    transparent_background: bool,
-    qr_scale: int,
-    qr_border: int,
-) -> str:
-    """Pure business logic - raises standard exceptions"""
-    if len(message) > 1500:
-        raise ValueError("Text too long")  # Standard Python!
-
-    if not message.strip():
-        raise ValueError("Message cannot be empty")  # Standard Python!
-
-    file_output_name = f"./deposit_files/{uuid.uuid4()}.png"
-    image_path = "./img/logo.png" if add_logo else None
-
-    create_qr_code(
-        data=message,
-        output_path=file_output_name,
-        center_image_path=image_path,
-        dark_color=dark_color,
-        light_color=light_color,
-        transparent_background=transparent_background,
-        scale=qr_scale,
-        border=qr_border,
-    )
-
-    return file_output_name
 
 
 @taipy_callback
