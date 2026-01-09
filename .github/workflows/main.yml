@@ -1,0 +1,37 @@
+name: Project Health Check
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: '0 0 * * 1' # Runs every Monday at midnight to check for new security bugs!
+
+jobs:
+  quality-control:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Sync Dependencies
+        run: uv sync
+
+      - name: Lint (Ruff)
+        run: uv run ruff check .
+
+      - name: Security Audit (Pip-audit)
+        id: audit
+        continue-on-error: true
+        run: uv run pip-audit
+
+      - name: Run Tests (Pytest)
+        run: uv run pytest --cov=src --cov-report=term --cov-report=xml
