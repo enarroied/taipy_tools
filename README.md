@@ -77,7 +77,7 @@ There you have it:
 
 You can run this application either **locally** or inside a **Docker container**.
 
-⚠️ Note: The provided code is **not production-grade**: it runs on Taipy’s default Flask server.  
+⚠️ Note: The provided code is **not production-grade**: it runs on Taipy’s default Flask server.
 In the future, I may adapt this to use a more robust WSGI server (e.g. Gunicorn).
 
 ---
