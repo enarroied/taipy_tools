@@ -15,3 +15,9 @@ def get_uuid(uuid_type, name=""):
             return uuid.uuid6()
         case "7":
             return uuid.uuid7()
+        case "":
+            raise ValueError("UUID value is empty")
+        case _:
+            raise ValueError(
+                f"Unsupported UUID type: {uuid_type}. Supported types: 1, 3, 4, 5, 6, 7"
+            )

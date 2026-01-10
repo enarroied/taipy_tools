@@ -1,12 +1,15 @@
 import taipy.gui.builder as tgb
 
 from algorithms.uuid_functions import get_uuid
+from taipy_utilities.taipy_callback import taipy_callback
 
 
+@taipy_callback
 def select_uuid(state):
     state.selected_uuid = get_uuid(state.uuid_type, state.name_for_uuid)
 
 
+@taipy_callback
 def change_name_select(state):
     with state as s:
         if s.uuid_type in ("3", "5"):

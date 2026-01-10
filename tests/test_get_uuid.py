@@ -1,3 +1,5 @@
+import pytest
+
 from src.algorithms.uuid_functions import get_uuid
 
 
@@ -65,9 +67,9 @@ class TestGetUUID:
         assert result.version == 7
 
     def test_invalid_uuid_type(self):
-        """Test that invalid UUID type returns None"""
-        result = get_uuid("99")
-        assert result is None
+        """Test that invalid UUID type returns ValueError"""
+        with pytest.raises(ValueError, match="Unsupported UUID type"):
+            get_uuid("99")
 
     def test_uuid3_different_names(self):
         """Test that different names produce different UUID3s"""
@@ -82,9 +84,9 @@ class TestGetUUID:
         assert result1 != result2
 
     def test_empty_string_type(self):
-        """Test behavior with empty string type"""
-        result = get_uuid("")
-        assert result is None
+        """Empty string raises ValueErro"""
+        with pytest.raises(ValueError, match="UUID value is empty"):
+            get_uuid("")
 
     def test_uuid_format(self):
         """Test that returned UUIDs have valid format"""
