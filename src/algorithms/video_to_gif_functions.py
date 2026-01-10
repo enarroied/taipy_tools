@@ -4,22 +4,39 @@ from pathlib import Path
 import ffmpeg
 
 
-def get_clip_duration(input_path: str) -> float:
-    """Gets the duration of a video file using ffprobe"""
+def video_to_gif(
+    input_path: str,
+    output_path: str,
+    start_time: float = 0,
+    duration: float = None,
+    fps: int = 10,
+    resize_factor: float = 1.0,
+) -> bool:
     try:
-        probe = ffmpeg.probe(input_path)
-        duration = float(probe["format"]["duration"])
-        print(f"Video duration: {duration:.2f} seconds")
-        return duration
+        _validate_input_file(input_path)
+        clip_info = _get_clip_info(input_path)
+        _log_results(input_path, clip_info, fps)
+        palette_path = _generate_palette(
+            input_path, start_time, duration, resize_factor
+        )
+        _create_gif(
+            input_path,
+            output_path,
+            start_time,
+            duration,
+            fps,
+            resize_factor,
+            palette_path,
+        )
+        _cleanup_file(palette_path)
+        print(f"GIF created successfully: '{output_path}'")
+        return True
     except ffmpeg.Error as e:
-        raise ValueError(
-            f"ffprobe error: Could not get duration for '{input_path}'.\
-                  {e.stderr.decode('utf8')}"
-        ) from e
-    except (FileNotFoundError, KeyError) as e:
-        raise ValueError(
-            f"Could not get duration. Is '{input_path}' a valid video file?"
-        ) from e
+        print(f"Error converting video to GIF: {e.stderr.decode('utf8')}")
+        return False
+    except Exception as e:
+        print(f"Error converting video to GIF: {str(e)}")
+        return False
 
 
 def _validate_input_file(input_path: str):
@@ -119,38 +136,3 @@ def _create_gif(
 def _cleanup_file(file_path: Path):
     if file_path.exists():
         file_path.unlink()
-
-
-def video_to_gif(
-    input_path: str,
-    output_path: str,
-    start_time: float = 0,
-    duration: float = None,
-    fps: int = 10,
-    resize_factor: float = 1.0,
-) -> bool:
-    try:
-        _validate_input_file(input_path)
-        clip_info = _get_clip_info(input_path)
-        _log_results(input_path, clip_info, fps)
-        palette_path = _generate_palette(
-            input_path, start_time, duration, resize_factor
-        )
-        _create_gif(
-            input_path,
-            output_path,
-            start_time,
-            duration,
-            fps,
-            resize_factor,
-            palette_path,
-        )
-        _cleanup_file(palette_path)
-        print(f"GIF created successfully: '{output_path}'")
-        return True
-    except ffmpeg.Error as e:
-        print(f"Error converting video to GIF: {e.stderr.decode('utf8')}")
-        return False
-    except Exception as e:
-        print(f"Error converting video to GIF: {str(e)}")
-        return False

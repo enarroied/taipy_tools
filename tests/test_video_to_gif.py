@@ -9,9 +9,9 @@ from src.algorithms.video_to_gif_functions import (
     _create_dir_if_not_exist,
     _get_clip_info,
     _validate_input_file,
-    get_clip_duration,
     video_to_gif,
 )
+from src.algorithms.video_to_gif_get_duration import get_clip_duration
 
 
 @pytest.fixture
