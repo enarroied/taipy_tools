@@ -4,6 +4,51 @@ from pathlib import Path
 import ffmpeg
 
 
+def select_video(content: str):
+    """Handles video selection and retrieves its properties."""
+    content_path = Path(content)
+    video_duration = get_clip_duration(content)
+    file_size = _calculate_file_size(content_path)
+    file_name = content_path.name
+    return content_path, video_duration, file_size, file_name
+
+
+def _calculate_file_size(content_path):
+    """Calculates the size of the file in a human-readable format."""
+    if not content_path.is_file():
+        return " - "
+
+    size_bytes = content_path.stat().st_size
+
+    for factor, suffix in [(1024**3, "GB"), (1024**2, "MB"), (1024, "KB")]:
+        if size_bytes >= factor:
+            return f"{size_bytes / factor:.2f} {suffix}"
+
+    return f"{size_bytes} B"
+
+
+def get_clip_duration(input_path: str) -> float:
+    """Gets the duration of a video file using ffprobe"""
+    try:
+        return _get_clip_duration(input_path)
+    except ffmpeg.Error as e:
+        raise ValueError(
+            f"ffprobe error: Could not get duration for '{input_path}'.\
+                  {e.stderr.decode('utf8')}"
+        ) from e
+    except (FileNotFoundError, KeyError) as e:
+        raise ValueError(
+            f"Could not get duration. Is '{input_path}' a valid video file?"
+        ) from e
+
+
+def _get_clip_duration(input_path: str) -> float:
+    probe = ffmpeg.probe(input_path)
+    duration = float(probe["format"]["duration"])
+    print(f"Video duration: {duration:.2f} seconds")
+    return duration
+
+
 def video_to_gif(
     input_path: str,
     output_path: str,

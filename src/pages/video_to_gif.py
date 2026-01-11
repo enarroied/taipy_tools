@@ -1,6 +1,9 @@
 import taipy.gui.builder as tgb
 
-from algorithms.video_to_gif_state_functions import convert_to_gif, select_video
+from algorithms.video_to_gif_state_functions import (
+    convert_to_gif_callback,
+    select_video_callback,
+)
 
 with tgb.Page() as video_gif_page:
     tgb.text("## Video to **GIF** Converter", mode="md")
@@ -10,7 +13,7 @@ with tgb.Page() as video_gif_page:
             tgb.file_selector(
                 "{content}",
                 label="Select Video",
-                on_action=select_video,
+                on_action=select_video_callback,
                 extensions=".mp4,.avi",
                 drop_message="Drop Message",
                 class_name="fullwidth",
@@ -39,7 +42,7 @@ with tgb.Page() as video_gif_page:
                     tgb.slider("{fps}", lov=[5, 7, 10, 15, 20, 25, 30, 35])
             tgb.button(
                 label="Convert to GIF!",
-                on_action=convert_to_gif,
+                on_action=convert_to_gif_callback,
                 class_name="fullwidth plain",
             )
 

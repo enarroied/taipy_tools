@@ -1,29 +1,13 @@
-from pathlib import Path
-
 import uuid_utils as uuid
 from taipy.gui import hold_control, notify, resume_control
 
-from algorithms.video_to_gif_functions import video_to_gif
-from algorithms.video_to_gif_get_duration import get_clip_duration
+from algorithms.video_to_gif_functions import select_video, video_to_gif
 from taipy_utilities.taipy_callback import taipy_callback
 
 
 def _delete_file(content_path):
     if content_path.is_file():
         content_path.unlink()
-
-
-def _calculate_file_size(content_path):
-    if not content_path.is_file():
-        return " - "
-
-    size_bytes = content_path.stat().st_size
-
-    for factor, suffix in [(1024**3, "GB"), (1024**2, "MB"), (1024, "KB")]:
-        if size_bytes >= factor:
-            return f"{size_bytes / factor:.2f} {suffix}"
-
-    return f"{size_bytes} B"
 
 
 def _clean_vide_to_gif_parameters(state):
@@ -38,14 +22,13 @@ def _clean_vide_to_gif_parameters(state):
 
 
 @taipy_callback
-def select_video(state):
+def select_video_callback(state):
     with state as s:
-        s.content_path = Path(s.content)
+        s.content_path, s.video_duration, s.file_size, s.file_name = select_video(
+            content=s.content
+        )
         s.gif_is_ready = False
-        s.video_duration = get_clip_duration(s.content)
-        s.file_size = _calculate_file_size(s.content_path)
         s.video_is_selected = True
-        s.file_name = s.content_path.name
 
 
 def _parameters_are_wrong(state):
@@ -78,7 +61,8 @@ def _assert_gif_ready(state, file_output_name):
         notify(s, "s", "GIF Generated Successfully!")
 
 
-def convert_to_gif(state):
+@taipy_callback
+def convert_to_gif_callback(state):
     with state as s:
         if _parameters_are_wrong(s):
             return
