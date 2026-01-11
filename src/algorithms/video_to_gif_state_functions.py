@@ -5,6 +5,7 @@ from taipy.gui import hold_control, notify, resume_control
 
 from algorithms.video_to_gif_functions import video_to_gif
 from algorithms.video_to_gif_get_duration import get_clip_duration
+from taipy_utilities.taipy_callback import taipy_callback
 
 
 def _delete_file(content_path):
@@ -15,14 +16,14 @@ def _delete_file(content_path):
 def _calculate_file_size(content_path):
     if not content_path.is_file():
         return " - "
-    size_bytes = content_path.stat().st_size
-    thresholds = [(1024**3, "GB"), (1024**2, "MB"), (1024, "KB"), (0, "B")]
 
-    for factor, suffix in thresholds:
+    size_bytes = content_path.stat().st_size
+
+    for factor, suffix in [(1024**3, "GB"), (1024**2, "MB"), (1024, "KB")]:
         if size_bytes >= factor:
-            if factor == 0:
-                return f"{size_bytes} {suffix}"
             return f"{size_bytes / factor:.2f} {suffix}"
+
+    return f"{size_bytes} B"
 
 
 def _clean_parameters(state):
@@ -36,6 +37,7 @@ def _clean_parameters(state):
         s.file_name = " - "
 
 
+@taipy_callback
 def select_video(state):
     with state as s:
         s.content_path = Path(s.content)
