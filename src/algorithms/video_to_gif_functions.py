@@ -13,22 +13,14 @@ def video_to_gif(
     resize_factor: float = 1.0,
 ) -> bool:
     try:
-        _validate_input_file(input_path)
-        clip_info = _get_clip_info(input_path)
-        _log_results(input_path, clip_info, fps)
-        palette_path = _generate_palette(
-            input_path, start_time, duration, resize_factor
-        )
-        _create_gif(
+        _video_to_gif(
             input_path,
             output_path,
             start_time,
             duration,
             fps,
             resize_factor,
-            palette_path,
         )
-        _cleanup_file(palette_path)
         print(f"GIF created successfully: '{output_path}'")
         return True
     except ffmpeg.Error as e:
@@ -37,6 +29,30 @@ def video_to_gif(
     except Exception as e:
         print(f"Error converting video to GIF: {str(e)}")
         return False
+
+
+def _video_to_gif(
+    input_path: str,
+    output_path: str,
+    start_time: float = 0,
+    duration: float = None,
+    fps: int = 10,
+    resize_factor: float = 1.0,
+):
+    _validate_input_file(input_path)
+    clip_info = _get_clip_info(input_path)
+    _log_results(input_path, clip_info, fps)
+    palette_path = _generate_palette(input_path, start_time, duration, resize_factor)
+    _create_gif(
+        input_path,
+        output_path,
+        start_time,
+        duration,
+        fps,
+        resize_factor,
+        palette_path,
+    )
+    _cleanup_file(palette_path)
 
 
 def _validate_input_file(input_path: str):
