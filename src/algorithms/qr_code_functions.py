@@ -14,12 +14,21 @@ def generate_qr_code(
     qr_scale: int,
     qr_border: int,
 ) -> str:
-    """Pure business logic - raises standard exceptions"""
+    """
+    Generate a QR code image from a message with optional logo and styling.
+    Args:
+        message (str): The text/data to encode in the QR code
+        add_logo (bool): Whether to add a logo at the center of the QR code
+        dark_color (str): Color for dark areas of the QR code
+        light_color (str): Color for light areas of the QR code
+        transparent_background (bool): If True, background will be transparent
+        qr_scale (int): Scale factor for QR code size
+        qr_border (int): Border size around QR code"""
     if len(message) > 1500:
-        raise ValueError("Text too long")  # Standard Python!
+        raise ValueError("Text too long")
 
     if not message.strip():
-        raise ValueError("Message cannot be empty")  # Standard Python!
+        raise ValueError("Message cannot be empty")
 
     file_output_name = f"./deposit_files/{uuid.uuid4()}.png"
     image_path = "./img/logo.png" if add_logo else None
