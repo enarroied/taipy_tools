@@ -26,7 +26,7 @@ def _calculate_file_size(content_path):
     return f"{size_bytes} B"
 
 
-def _clean_parameters(state):
+def _clean_vide_to_gif_parameters(state):
     with state as s:
         s.video_duration = 0
         _delete_file(s.content_path)
@@ -93,5 +93,5 @@ def convert_to_gif(state):
             resize_factor=s.resize_factor,
         ):
             _assert_gif_ready(s, file_output_name)
-    _clean_parameters(state)
+    _clean_vide_to_gif_parameters(state)
     resume_control(state)
