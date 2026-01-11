@@ -1,6 +1,7 @@
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
 [![Taipy](https://img.shields.io/badge/taipy-4.1-red.svg)](https://docs.taipy.io/en/latest/)
+[![codecov](https://codecov.io/github/enarroied/taipy_tools/branch/master/graph/badge.svg?token=HLZVB6WFMT)](https://codecov.io/github/enarroied/taipy_tools)
 
 # Taipy 🛠️ Tools
 
