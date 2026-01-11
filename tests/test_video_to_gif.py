@@ -207,14 +207,13 @@ class TestVideoToGif:
         assert result is True
 
     @patch("src.algorithms.video_to_gif_functions._validate_input_file")
-    def test_returns_false_on_validation_error(
+    def test_raises_error_on_validation_error(
         self, mock_validate, sample_video_file, output_gif_path
     ):
         """Test that function returns False when validation fails."""
         mock_validate.side_effect = FileNotFoundError("File not found")
-
-        result = video_to_gif(str(sample_video_file), str(output_gif_path))
-        assert result is False
+        with pytest.raises(ValueError, match="Error converting video to GIF:"):
+            video_to_gif(str(sample_video_file), str(output_gif_path))
 
     @patch("src.algorithms.video_to_gif_functions._cleanup_file")
     @patch("src.algorithms.video_to_gif_functions._create_gif")

@@ -24,11 +24,9 @@ def video_to_gif(
         print(f"GIF created successfully: '{output_path}'")
         return True
     except ffmpeg.Error as e:
-        print(f"Error converting video to GIF: {e.stderr.decode('utf8')}")
-        return False
+        raise ValueError(f"Error converting video to GIF: {e.stderr.decode('utf8')}")
     except Exception as e:
-        print(f"Error converting video to GIF: {str(e)}")
-        return False
+        raise ValueError(f"Error converting video to GIF: {str(e)}")
 
 
 def _video_to_gif(
