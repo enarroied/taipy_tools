@@ -58,6 +58,12 @@ def video_to_gif(
     resize_factor: float = 1.0,
 ) -> bool:
     try:
+        _validate_input_file(input_path)
+
+        # Get duration first for validation
+        video_duration = get_clip_duration(input_path)
+        _validate_parameters(start_time, duration, video_duration)
+
         _video_to_gif(
             input_path,
             output_path,
@@ -66,11 +72,8 @@ def video_to_gif(
             fps,
             resize_factor,
         )
-        print(f"GIF created successfully: '{output_path}'")
         return True
-    except ffmpeg.Error as e:
-        raise ValueError(f"Error converting video to GIF: {e.stderr.decode('utf8')}")
-    except Exception as e:
+    except (ValueError, FileNotFoundError) as e:
         raise ValueError(f"Error converting video to GIF: {str(e)}")
 
 
@@ -96,6 +99,18 @@ def _video_to_gif(
         palette_path,
     )
     _cleanup_file(palette_path)
+
+
+def _validate_parameters(start_time, duration, video_duration):
+    """Validate timing parameters against video duration."""
+    if duration and duration > video_duration:
+        raise ValueError("Duration exceeds video length")
+
+    if start_time > video_duration:
+        raise ValueError("Start time is after video ends")
+
+    if duration and (start_time + duration) > video_duration:
+        raise ValueError("Start time + duration exceeds video length")
 
 
 def _validate_input_file(input_path: str):

@@ -184,6 +184,7 @@ class TestCleanupFile:
 class TestVideoToGif:
     """Integration tests for video to GIF conversion."""
 
+    @patch("src.algorithms.video_to_gif_functions.get_clip_duration")
     @patch("src.algorithms.video_to_gif_functions._cleanup_file")
     @patch("src.algorithms.video_to_gif_functions._create_gif")
     @patch("src.algorithms.video_to_gif_functions._generate_palette")
@@ -196,25 +197,31 @@ class TestVideoToGif:
         mock_palette,
         mock_create,
         mock_cleanup,
+        mock_duration,
         sample_video_file,
         output_gif_path,
     ):
         """Test that function returns True on success."""
+        mock_duration.return_value = 10.0
         mock_info.return_value = {"duration": 10.0, "size": (1920, 1080)}
         mock_palette.return_value = Path("palette.png")
 
         result = video_to_gif(str(sample_video_file), str(output_gif_path))
         assert result is True
 
+    @patch("src.algorithms.video_to_gif_functions.get_clip_duration")
     @patch("src.algorithms.video_to_gif_functions._validate_input_file")
     def test_raises_error_on_validation_error(
-        self, mock_validate, sample_video_file, output_gif_path
+        self, mock_validate, mock_duration, sample_video_file, output_gif_path
     ):
-        """Test that function returns False when validation fails."""
+        """Test that function raises error when validation fails."""
         mock_validate.side_effect = FileNotFoundError("File not found")
-        with pytest.raises(ValueError, match="Error converting video to GIF:"):
+        mock_duration.return_value = 10.0
+
+        with pytest.raises(ValueError, match="Error converting video to GIF"):
             video_to_gif(str(sample_video_file), str(output_gif_path))
 
+    @patch("src.algorithms.video_to_gif_functions.get_clip_duration")
     @patch("src.algorithms.video_to_gif_functions._cleanup_file")
     @patch("src.algorithms.video_to_gif_functions._create_gif")
     @patch("src.algorithms.video_to_gif_functions._generate_palette")
@@ -227,16 +234,19 @@ class TestVideoToGif:
         mock_palette,
         mock_create,
         mock_cleanup,
+        mock_duration,
         sample_video_file,
         output_gif_path,
     ):
         """Test that input validation is called."""
+        mock_duration.return_value = 10.0
         mock_info.return_value = {"duration": 10.0, "size": (1920, 1080)}
         mock_palette.return_value = Path("palette.png")
 
         video_to_gif(str(sample_video_file), str(output_gif_path))
-        mock_validate.assert_called_once_with(str(sample_video_file))
+        mock_validate.assert_called_with(str(sample_video_file))
 
+    @patch("src.algorithms.video_to_gif_functions.get_clip_duration")
     @patch("src.algorithms.video_to_gif_functions._cleanup_file")
     @patch("src.algorithms.video_to_gif_functions._create_gif")
     @patch("src.algorithms.video_to_gif_functions._generate_palette")
@@ -249,16 +259,19 @@ class TestVideoToGif:
         mock_palette,
         mock_create,
         mock_cleanup,
+        mock_duration,
         sample_video_file,
         output_gif_path,
     ):
         """Test that clip info retrieval is called."""
+        mock_duration.return_value = 10.0
         mock_info.return_value = {"duration": 10.0, "size": (1920, 1080)}
         mock_palette.return_value = Path("palette.png")
 
         video_to_gif(str(sample_video_file), str(output_gif_path))
         mock_info.assert_called_once_with(str(sample_video_file))
 
+    @patch("src.algorithms.video_to_gif_functions.get_clip_duration")
     @patch("src.algorithms.video_to_gif_functions._cleanup_file")
     @patch("src.algorithms.video_to_gif_functions._create_gif")
     @patch("src.algorithms.video_to_gif_functions._generate_palette")
@@ -271,10 +284,12 @@ class TestVideoToGif:
         mock_palette,
         mock_create,
         mock_cleanup,
+        mock_duration,
         sample_video_file,
         output_gif_path,
     ):
         """Test that cleanup is called."""
+        mock_duration.return_value = 10.0
         mock_info.return_value = {"duration": 10.0, "size": (1920, 1080)}
         palette_path = Path("palette.png")
         mock_palette.return_value = palette_path

@@ -10,7 +10,7 @@ def _delete_file(content_path):
         content_path.unlink()
 
 
-def _clean_vide_to_gif_parameters(state):
+def _clean_video_to_gif_parameters(state):
     with state as s:
         s.video_duration = 0
         _delete_file(s.content_path)
@@ -31,29 +31,6 @@ def select_video_callback(state):
         s.video_is_selected = True
 
 
-def _parameters_are_wrong(state):
-    with state as s:
-        checks = [
-            (
-                s.duration > s.video_duration,
-                "Duration shouldn't be longer than total file duration.",
-            ),
-            (
-                s.start_time > s.video_duration,
-                "Start Time shouldn't be after video ends!",
-            ),
-            (
-                (s.duration + s.start_time) > s.video_duration,
-                "Duration + Start Time can't be longer than total file duration.",
-            ),
-        ]
-        for condition, message in checks:
-            if condition:
-                notify(s, "e", message)
-                return True
-    return False
-
-
 def _assert_gif_ready(state, file_output_name):
     with state as s:
         s.gif_is_ready = True
@@ -64,18 +41,21 @@ def _assert_gif_ready(state, file_output_name):
 @taipy_callback
 def convert_to_gif_callback(state):
     with state as s:
-        if _parameters_are_wrong(s):
-            return
         hold_control(s, message="Generating GIF")
         file_output_name = f"./deposit_files/{uuid.uuid4()}.gif"
-        if video_to_gif(
-            input_path=s.content,
-            output_path=file_output_name,
-            start_time=s.start_time,
-            duration=s.duration,
-            fps=int(s.fps),
-            resize_factor=s.resize_factor,
-        ):
+
+        try:
+            video_to_gif(
+                input_path=s.content,
+                output_path=file_output_name,
+                start_time=s.start_time,
+                duration=s.duration,
+                fps=int(s.fps),
+                resize_factor=s.resize_factor,
+            )
             _assert_gif_ready(s, file_output_name)
-    _clean_vide_to_gif_parameters(state)
-    resume_control(state)
+        except ValueError as e:
+            notify(s, "e", str(e))
+        finally:
+            _clean_video_to_gif_parameters(state)
+            resume_control(state)
