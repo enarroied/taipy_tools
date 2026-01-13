@@ -1,6 +1,6 @@
 import taipy.gui.builder as tgb
 
-from algorithms.video_to_gif_state_functions import (
+from callbacks.video_to_gif_callbacks import (
     convert_to_gif_callback,
     select_video_callback,
 )
