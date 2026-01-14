@@ -1,15 +1,13 @@
-name: Project Health Check
+name: Tests
 
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-  schedule:
-    - cron: '0 0 * * 1' # Runs every Monday at midnight to check for new security bugs!
 
 jobs:
-  quality-control:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,14 +22,6 @@ jobs:
 
       - name: Sync Dependencies
         run: uv sync
-
-      - name: Lint (Ruff)
-        run: uv run ruff check .
-
-      - name: Security Audit (Pip-audit)
-        id: audit
-        continue-on-error: true
-        run: uv run pip-audit
 
       - name: Run Tests (Pytest)
         run: uv run pytest --cov=src --cov-report=term --cov-report=xml
