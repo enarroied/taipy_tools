@@ -10,3 +10,4 @@ class QRCodeConfig:
     transparent_background: bool = False
     scale: int = 8
     border: int = 4
+    file_output_name: str = "qr_code.png"

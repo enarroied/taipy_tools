@@ -1,94 +1,77 @@
+from dataclasses import asdict
 from pathlib import Path
 
 import segno
-import uuid_utils as uuid
 from PIL import Image
+
+from context.qrcodeconfig import QRCodeConfig
 
 
 def generate_qr_code(
-    message: str,
-    add_logo: bool,
-    dark_color: str,
-    light_color: str,
-    transparent_background: bool,
-    scale: int,
-    border: int,
+    config: QRCodeConfig,
 ) -> str:
     """
     Generate a QR code image from a message with optional logo and styling.
     Args:
-        message (str): The text/data to encode in the QR code
-        add_logo (bool): Whether to add a logo at the center of the QR code
-        dark_color (str): Color for dark areas of the QR code
-        light_color (str): Color for light areas of the QR code
-        transparent_background (bool): If True, background will be transparent
-        qr_scale (int): Scale factor for QR code size
-        qr_border (int): Border size around QR code"""
+        config (QRCodeConfig): Parameters to create the QR Code
+    Returns:
+        str: Path to the generated QR code image
+    """
+    message = config.message
     if len(message) > 1500:
         raise ValueError("Text too long")
 
     if not message.strip():
         raise ValueError("Message cannot be empty")
 
-    file_output_name = f"./deposit_files/{uuid.uuid4()}.png"
-    image_path = "./img/logo.png" if add_logo else None
-
-    create_qr_code(
-        data=message,
-        output_path=file_output_name,
-        center_image_path=image_path,
-        dark_color=dark_color,
-        light_color=light_color,
-        transparent_background=transparent_background,
-        scale=scale,
-        border=border,
-    )
-
-    return file_output_name
+    create_qr_code(**asdict(config))
+    return config.file_output_name
 
 
 def create_qr_code(
-    data,
-    output_path="qr_code.png",
-    center_image_path=None,
+    message,
+    add_logo=None,
     dark_color="black",
     light_color="white",
     transparent_background=False,
     scale=8,
     border=4,
+    file_output_name="qr_code.png",
 ):
     """
     Create a QR code with optional center image and custom styling.
 
     Args:
-        data (str): The text/data to encode in the QR code
-        output_path (str): Path where the QR code image will be saved
-        center_image_path (str, optional): Path to image to place in center of QR code
-        dark_color (str): Color for dark areas (default: "black")
-        light_color (str): Color for light areas (default: "white")
-        transparent_background (bool): If True, background will be transparent
+        message (str): The text/data to encode in the QR code
+        add_logo (bool, optional): If True, adds a logo at the center of the QR code
+        dark_color (str, optional): Color for dark areas (default: "black")
+        light_color (str, optional): Color for light areas (default: "white")
+        transparent_background (bool, optional): If True, background will be transparent
             (default: False)
-        scale (int): Scale factor for QR code size (default: 8)
-        border (int): Border size around QR code (default: 4)
+        scale (int, optional): Scale factor for QR code size (default: 8)
+        border (int, optional): Border size around QR code (default: 4)
 
     Returns:
         str: Path to the generated QR code image
     """
-    qr = segno.make(data, error="H")
+
+    qr = segno.make(message, error="H")
+    center_image_path = "./img/logo.png" if add_logo else None
 
     if not center_image_path or not Path(center_image_path).exists():
         _save_qr_direct(
             qr,
-            output_path,
+            file_output_name,
             scale,
             border,
             dark_color,
             transparent_background,
             light_color,
         )
-        return output_path
+        return file_output_name
 
     temp_path = Path("temp_qr.png")
+
     try:
         _save_qr_to_temp(
             qr,
@@ -107,10 +90,11 @@ def create_qr_code(
         )
 
         final_img = _add_center_image(qr_img, center_img)
-        final_img.save(output_path)
+        final_img.save(file_output_name)
+
     finally:
         _cleanup_temp_file(temp_path)
-    return output_path
+    return file_output_name
 
 
 def _save_qr_direct(
@@ -121,6 +105,7 @@ def _save_qr_direct(
     qr.save(output_path, scale=scale, border=border, dark=dark_color, light=background)
 
 
+# TODO; Remove one of these 2 identical functions!!!
 def _save_qr_to_temp(
     qr, temp_path, scale, border, dark_color, transparent_background, light_color
 ):

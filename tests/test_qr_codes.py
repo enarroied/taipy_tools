@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 from PIL import Image
 
-from src.algorithms.qr_code_functions import (
+from algorithms.qr_code_functions import (
     _add_center_image,
     _calculate_center_position,
     _center,
@@ -13,6 +13,7 @@ from src.algorithms.qr_code_functions import (
     create_qr_code,
     generate_qr_code,
 )
+from context.qrcodeconfig import QRCodeConfig
 
 
 @pytest.fixture
@@ -35,17 +36,17 @@ class TestBasicQRCreation:
 
     def test_creates_qr_code_file(self, qr_output_path):
         """Test that QR code file is created."""
-        create_qr_code("test data", output_path=str(qr_output_path))
+        create_qr_code("test data", file_output_name=str(qr_output_path))
         assert qr_output_path.exists()
 
     def test_returns_output_path(self, qr_output_path):
         """Test that function returns the output path."""
-        result = create_qr_code("test data", output_path=str(qr_output_path))
+        result = create_qr_code("test data", file_output_name=str(qr_output_path))
         assert result == str(qr_output_path)
 
     def test_creates_valid_image(self, qr_output_path):
         """Test that created file is a valid image."""
-        create_qr_code("test data", output_path=str(qr_output_path))
+        create_qr_code("test data", file_output_name=str(qr_output_path))
         img = Image.open(qr_output_path)
         assert img is not None
 
@@ -57,43 +58,38 @@ class TestBasicQRCreation:
         finally:
             Path(result).unlink()
 
-    def test_generate_qr_code_success(self):
-        with patch("src.algorithms.qr_code_functions.create_qr_code"):
-            result = generate_qr_code(
-                message="Test message",
-                add_logo=True,
-                dark_color="#000",
-                light_color="#FFF",
-                transparent_background=False,
-                scale=10,
-                border=4,
-            )
-            assert result.startswith("./deposit_files/")
-            assert result.endswith(".png")
+    def test_generate_qr_code_success(self, qr_output_path):
+        """Test successful QR code generation with config."""
+        config = QRCodeConfig(
+            message="Test message",
+            add_logo=True,
+            dark_color="#000",
+            light_color="#FFF",
+            transparent_background=False,
+            scale=10,
+            border=4,
+            file_output_name=str(qr_output_path),
+        )
+        result = generate_qr_code(config)
+        assert result == str(qr_output_path)
 
     def test_generate_qr_code_text_too_long(self):
+        """Test that overly long text raises ValueError."""
+        config = QRCodeConfig(
+            message="x" * 1501,
+            add_logo=False,
+        )
         with pytest.raises(ValueError, match="Text too long"):
-            generate_qr_code(
-                message="x" * 1501,
-                add_logo=False,
-                dark_color="#000",
-                light_color="#FFF",
-                transparent_background=False,
-                scale=10,
-                border=4,
-            )
+            generate_qr_code(config)
 
     def test_generate_qr_code_empty_message(self):
+        """Test that empty message raises ValueError."""
+        config = QRCodeConfig(
+            message="   ",  # Just whitespace
+            add_logo=False,
+        )
         with pytest.raises(ValueError, match="Message cannot be empty"):
-            generate_qr_code(
-                message="   ",  # Just whitespace
-                add_logo=False,
-                dark_color="#000",
-                light_color="#FFF",
-                transparent_background=False,
-                scale=10,
-                border=4,
-            )
+            generate_qr_code(config)
 
 
 class TestQRWithCenterImage:
@@ -101,38 +97,45 @@ class TestQRWithCenterImage:
 
     def test_creates_qr_with_center_image(self, qr_output_path, sample_center_image):
         """Test QR code is created with center image."""
-        create_qr_code(
-            "test data",
-            output_path=str(qr_output_path),
-            center_image_path=str(sample_center_image),
-        )
+        # Mock the logo path to use our sample image
+        with patch("src.algorithms.qr_code_functions.Path") as mock_path:
+            mock_path.return_value.exists.return_value = True
+            mock_path.return_value = sample_center_image
+            create_qr_code(
+                "test data",
+                file_output_name=str(qr_output_path),
+                add_logo=True,
+            )
         assert qr_output_path.exists()
 
     def test_handles_missing_center_image(self, qr_output_path):
         """Test graceful handling when center image doesn't exist."""
         create_qr_code(
             "test data",
-            output_path=str(qr_output_path),
-            center_image_path="nonexistent.png",
+            file_output_name=str(qr_output_path),
+            add_logo=True,  # Logo path won't exist
         )
         assert qr_output_path.exists()
 
     def test_handles_none_center_image(self, qr_output_path):
-        """Test handling when center_image_path is None."""
+        """Test handling when add_logo is False."""
         create_qr_code(
             "test data",
-            output_path=str(qr_output_path),
-            center_image_path=None,
+            file_output_name=str(qr_output_path),
+            add_logo=False,
         )
         assert qr_output_path.exists()
 
     def test_temp_file_cleaned_up(self, qr_output_path, sample_center_image):
         """Test temporary file is cleaned up after creation."""
-        create_qr_code(
-            "test data",
-            output_path=str(qr_output_path),
-            center_image_path=str(sample_center_image),
-        )
+        with patch("src.algorithms.qr_code_functions.Path") as mock_path:
+            mock_path.return_value.exists.return_value = True
+            mock_path.return_value = sample_center_image
+            create_qr_code(
+                "test data",
+                file_output_name=str(qr_output_path),
+                add_logo=True,
+            )
         assert not Path("temp_qr.png").exists()
 
 
@@ -141,14 +144,16 @@ class TestCustomStyling:
 
     def test_custom_dark_color(self, qr_output_path):
         """Test QR code with custom dark color."""
-        create_qr_code("test data", output_path=str(qr_output_path), dark_color="red")
+        create_qr_code(
+            "test data", file_output_name=str(qr_output_path), dark_color="red"
+        )
         assert qr_output_path.exists()
 
     def test_custom_light_color(self, qr_output_path):
         """Test QR code with custom light color."""
         create_qr_code(
             "test data",
-            output_path=str(qr_output_path),
+            file_output_name=str(qr_output_path),
             light_color="yellow",
         )
         assert qr_output_path.exists()
@@ -157,19 +162,19 @@ class TestCustomStyling:
         """Test QR code with transparent background."""
         create_qr_code(
             "test data",
-            output_path=str(qr_output_path),
+            file_output_name=str(qr_output_path),
             transparent_background=True,
         )
         assert qr_output_path.exists()
 
     def test_custom_scale(self, qr_output_path):
         """Test QR code with custom scale."""
-        create_qr_code("test data", output_path=str(qr_output_path), scale=10)
+        create_qr_code("test data", file_output_name=str(qr_output_path), scale=10)
         assert qr_output_path.exists()
 
     def test_custom_border(self, qr_output_path):
         """Test QR code with custom border."""
-        create_qr_code("test data", output_path=str(qr_output_path), border=2)
+        create_qr_code("test data", file_output_name=str(qr_output_path), border=2)
         assert qr_output_path.exists()
 
 
@@ -291,16 +296,19 @@ class TestQRCodeIntegration:
 
     def test_full_workflow_with_all_options(self, qr_output_path, sample_center_image):
         """Test complete workflow with all options."""
-        create_qr_code(
-            "https://example.com",
-            output_path=str(qr_output_path),
-            center_image_path=str(sample_center_image),
-            dark_color="blue",
-            light_color="lightblue",
-            transparent_background=False,
-            scale=10,
-            border=2,
-        )
+        with patch("src.algorithms.qr_code_functions.Path") as mock_path:
+            mock_path.return_value.exists.return_value = True
+            mock_path.return_value = sample_center_image
+            create_qr_code(
+                "https://example.com",
+                file_output_name=str(qr_output_path),
+                add_logo=True,
+                dark_color="blue",
+                light_color="lightblue",
+                transparent_background=False,
+                scale=10,
+                border=2,
+            )
         assert qr_output_path.exists()
 
     def test_multiple_qr_codes_created(self, tmp_path):
@@ -308,8 +316,8 @@ class TestQRCodeIntegration:
         path1 = tmp_path / "qr1.png"
         path2 = tmp_path / "qr2.png"
 
-        create_qr_code("data1", output_path=str(path1))
-        create_qr_code("data2", output_path=str(path2))
+        create_qr_code("data1", file_output_name=str(path1))
+        create_qr_code("data2", file_output_name=str(path2))
 
         assert path1.exists()
 
@@ -318,13 +326,15 @@ class TestQRCodeIntegration:
         path1 = tmp_path / "qr1.png"
         path2 = tmp_path / "qr2.png"
 
-        create_qr_code("data1", output_path=str(path1))
-        create_qr_code("data2", output_path=str(path2))
+        create_qr_code("data1", file_output_name=str(path1))
+        create_qr_code("data2", file_output_name=str(path2))
 
         assert path2.exists()
 
     def test_overwrites_existing_file(self, qr_output_path):
         """Test that existing file is overwritten."""
-        create_qr_code("first", output_path=str(qr_output_path))
-        create_qr_code("second data with more content", output_path=str(qr_output_path))
+        create_qr_code("first", file_output_name=str(qr_output_path))
+        create_qr_code(
+            "second data with more content", file_output_name=str(qr_output_path)
+        )
         assert qr_output_path.exists()

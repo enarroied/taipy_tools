@@ -1,4 +1,4 @@
-from dataclasses import asdict
+import uuid_utils as uuid
 
 from algorithms.qr_code_functions import generate_qr_code
 from context.qrcodeconfig import QRCodeConfig
@@ -15,10 +15,11 @@ def state_to_qr_config(state) -> QRCodeConfig:
         transparent_background=state.transparent_background,
         scale=state.qr_scale,
         border=state.qr_border,
+        file_output_name=f"./deposit_files/{uuid.uuid4()}.png",
     )
 
 
 @taipy_callback
 def make_qr_code(s):
     config = state_to_qr_config(s)
-    s.image_path = generate_qr_code(**asdict(config))
+    s.image_path = generate_qr_code(config)
