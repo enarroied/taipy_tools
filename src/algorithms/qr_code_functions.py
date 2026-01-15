@@ -11,8 +11,8 @@ def generate_qr_code(
     dark_color: str,
     light_color: str,
     transparent_background: bool,
-    qr_scale: int,
-    qr_border: int,
+    scale: int,
+    border: int,
 ) -> str:
     """
     Generate a QR code image from a message with optional logo and styling.
@@ -40,8 +40,8 @@ def generate_qr_code(
         dark_color=dark_color,
         light_color=light_color,
         transparent_background=transparent_background,
-        scale=qr_scale,
-        border=qr_border,
+        scale=scale,
+        border=border,
     )
 
     return file_output_name

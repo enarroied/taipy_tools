@@ -65,8 +65,8 @@ class TestBasicQRCreation:
                 dark_color="#000",
                 light_color="#FFF",
                 transparent_background=False,
-                qr_scale=10,
-                qr_border=4,
+                scale=10,
+                border=4,
             )
             assert result.startswith("./deposit_files/")
             assert result.endswith(".png")
@@ -79,8 +79,8 @@ class TestBasicQRCreation:
                 dark_color="#000",
                 light_color="#FFF",
                 transparent_background=False,
-                qr_scale=10,
-                qr_border=4,
+                scale=10,
+                border=4,
             )
 
     def test_generate_qr_code_empty_message(self):
@@ -91,8 +91,8 @@ class TestBasicQRCreation:
                 dark_color="#000",
                 light_color="#FFF",
                 transparent_background=False,
-                qr_scale=10,
-                qr_border=4,
+                scale=10,
+                border=4,
             )
 
 
