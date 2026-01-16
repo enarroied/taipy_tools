@@ -59,7 +59,7 @@ def create_qr_code(
     center_image_path = "./img/logo.png" if add_logo else None
 
     if not center_image_path or not Path(center_image_path).exists():
-        _save_qr_direct(
+        _save_qr_code(
             qr,
             file_output_name,
             scale,
@@ -73,7 +73,7 @@ def create_qr_code(
     temp_path = Path("temp_qr.png")
 
     try:
-        _save_qr_to_temp(
+        _save_qr_code(
             qr,
             temp_path,
             scale,
@@ -97,21 +97,12 @@ def create_qr_code(
     return file_output_name
 
 
-def _save_qr_direct(
-    qr, output_path, scale, border, dark_color, transparent_background, light_color
-):
-    """Save QR code directly without temp file."""
-    background = None if transparent_background else light_color
-    qr.save(output_path, scale=scale, border=border, dark=dark_color, light=background)
-
-
-# TODO; Remove one of these 2 identical functions!!!
-def _save_qr_to_temp(
-    qr, temp_path, scale, border, dark_color, transparent_background, light_color
+def _save_qr_code(
+    qr, path, scale, border, dark_color, transparent_background, light_color
 ):
     """Save QR code to temporary file."""
     background = None if transparent_background else light_color
-    qr.save(temp_path, scale=scale, border=border, dark=dark_color, light=background)
+    qr.save(path, scale=scale, border=border, dark=dark_color, light=background)
 
 
 def _prepare_center_image(center_image_path, qr_size):
