@@ -1,5 +1,4 @@
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 from PIL import Image
@@ -8,10 +7,10 @@ from algorithms.qr_code_functions import (
     _add_center_image,
     _calculate_center_position,
     _center,
-    _cleanup_temp_file,
     _prepare_center_image,
     create_qr_code,
     generate_qr_code,
+    temp_qr_file,
 )
 from context.qrcodeconfig import QRCodeConfig
 
@@ -97,16 +96,27 @@ class TestQRWithCenterImage:
 
     def test_creates_qr_with_center_image(self, qr_output_path, sample_center_image):
         """Test QR code is created with center image."""
-        # Mock the logo path to use our sample image
-        with patch("src.algorithms.qr_code_functions.Path") as mock_path:
-            mock_path.return_value.exists.return_value = True
-            mock_path.return_value = sample_center_image
+        # Temporarily create a logo file where the code expects it
+        logo_path = Path("./img/logo.png")
+        logo_path.parent.mkdir(parents=True, exist_ok=True)
+
+        try:
+            # Copy our sample image to the logo location
+            img = Image.open(sample_center_image)
+            img.save(logo_path)
+
             create_qr_code(
                 "test data",
                 file_output_name=str(qr_output_path),
                 add_logo=True,
             )
-        assert qr_output_path.exists()
+            assert qr_output_path.exists()
+        finally:
+            # Clean up
+            if logo_path.exists():
+                logo_path.unlink()
+            if logo_path.parent.exists() and not any(logo_path.parent.iterdir()):
+                logo_path.parent.rmdir()
 
     def test_handles_missing_center_image(self, qr_output_path):
         """Test graceful handling when center image doesn't exist."""
@@ -128,15 +138,24 @@ class TestQRWithCenterImage:
 
     def test_temp_file_cleaned_up(self, qr_output_path, sample_center_image):
         """Test temporary file is cleaned up after creation."""
-        with patch("src.algorithms.qr_code_functions.Path") as mock_path:
-            mock_path.return_value.exists.return_value = True
-            mock_path.return_value = sample_center_image
+        logo_path = Path("./img/logo.png")
+        logo_path.parent.mkdir(parents=True, exist_ok=True)
+
+        try:
+            img = Image.open(sample_center_image)
+            img.save(logo_path)
+
             create_qr_code(
                 "test data",
                 file_output_name=str(qr_output_path),
                 add_logo=True,
             )
-        assert not Path("temp_qr.png").exists()
+            assert not Path("temp_qr.png").exists()
+        finally:
+            if logo_path.exists():
+                logo_path.unlink()
+            if logo_path.parent.exists() and not any(logo_path.parent.iterdir()):
+                logo_path.parent.rmdir()
 
 
 class TestCustomStyling:
@@ -274,21 +293,46 @@ class TestAddCenterImage:
         assert result.size == qr_img.size
 
 
-class TestCleanupTempFile:
-    """Test temporary file cleanup."""
+class TestTempQRFileContextManager:
+    """Test the temp_qr_file context manager."""
 
-    def test_deletes_existing_file(self, tmp_path):
-        """Test that existing temp file is deleted."""
-        temp_file = tmp_path / "temp_test.png"
-        temp_file.touch()
-        _cleanup_temp_file(temp_file)
-        assert not temp_file.exists()
+    def test_creates_and_deletes_temp_file(self, tmp_path):
+        """Test that temp file is created and deleted."""
+        temp_file_path = tmp_path / "test_temp.png"
+
+        with temp_qr_file(str(temp_file_path)) as temp_path:
+            # Create a file
+            temp_path.touch()
+            assert temp_path.exists()
+
+        # After context, file should be deleted
+        assert not temp_file_path.exists()
+
+    def test_deletes_file_even_on_error(self, tmp_path):
+        """Test that temp file is deleted even if error occurs."""
+        temp_file_path = tmp_path / "test_temp.png"
+
+        try:
+            with temp_qr_file(str(temp_file_path)) as temp_path:
+                temp_path.touch()
+                assert temp_path.exists()
+                raise ValueError("Simulated error")
+        except ValueError:
+            pass
+
+        # File should still be deleted despite error
+        assert not temp_file_path.exists()
 
     def test_handles_nonexistent_file(self, tmp_path):
-        """Test handling when temp file doesn't exist."""
-        temp_file = tmp_path / "nonexistent.png"
-        _cleanup_temp_file(temp_file)
-        assert True
+        """Test handling when temp file was never created."""
+        temp_file_path = tmp_path / "never_created.png"
+
+        with temp_qr_file(str(temp_file_path)):
+            # Don't create the file
+            pass
+
+        # Should not raise error
+        assert not temp_file_path.exists()
 
 
 class TestQRCodeIntegration:
@@ -296,9 +340,13 @@ class TestQRCodeIntegration:
 
     def test_full_workflow_with_all_options(self, qr_output_path, sample_center_image):
         """Test complete workflow with all options."""
-        with patch("src.algorithms.qr_code_functions.Path") as mock_path:
-            mock_path.return_value.exists.return_value = True
-            mock_path.return_value = sample_center_image
+        logo_path = Path("./img/logo.png")
+        logo_path.parent.mkdir(parents=True, exist_ok=True)
+
+        try:
+            img = Image.open(sample_center_image)
+            img.save(logo_path)
+
             create_qr_code(
                 "https://example.com",
                 file_output_name=str(qr_output_path),
@@ -309,7 +357,12 @@ class TestQRCodeIntegration:
                 scale=10,
                 border=2,
             )
-        assert qr_output_path.exists()
+            assert qr_output_path.exists()
+        finally:
+            if logo_path.exists():
+                logo_path.unlink()
+            if logo_path.parent.exists() and not any(logo_path.parent.iterdir()):
+                logo_path.parent.rmdir()
 
     def test_multiple_qr_codes_created(self, tmp_path):
         """Test creating multiple QR codes in sequence."""

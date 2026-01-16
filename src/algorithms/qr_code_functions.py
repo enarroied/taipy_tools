@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from dataclasses import asdict
 from pathlib import Path
 
@@ -38,28 +39,12 @@ def create_qr_code(
     border=4,
     file_output_name="qr_code.png",
 ):
-    """
-    Create a QR code with optional center image and custom styling.
-
-    Args:
-        message (str): The text/data to encode in the QR code
-        add_logo (bool, optional): If True, adds a logo at the center of the QR code
-        dark_color (str, optional): Color for dark areas (default: "black")
-        light_color (str, optional): Color for light areas (default: "white")
-        transparent_background (bool, optional): If True, background will be transparent
-            (default: False)
-        scale (int, optional): Scale factor for QR code size (default: 8)
-        border (int, optional): Border size around QR code (default: 4)
-
-    Returns:
-        str: Path to the generated QR code image
-    """
-
+    """Create a QR code with optional center image and custom styling."""
     qr = segno.make(message, error="H")
     center_image_path = "./img/logo.png" if add_logo else None
 
     if not center_image_path or not Path(center_image_path).exists():
-        _save_qr_code(
+        return _create_simple_qr(
             qr,
             file_output_name,
             scale,
@@ -68,11 +53,41 @@ def create_qr_code(
             transparent_background,
             light_color,
         )
-        return file_output_name
 
-    temp_path = Path("temp_qr.png")
+    return _create_qr_with_logo(
+        qr,
+        center_image_path,
+        file_output_name,
+        scale,
+        border,
+        dark_color,
+        transparent_background,
+        light_color,
+    )
 
-    try:
+
+def _create_simple_qr(
+    qr, output_path, scale, border, dark_color, transparent_background, light_color
+):
+    """Create QR code without logo - no conditional logic."""
+    _save_qr_code(
+        qr, output_path, scale, border, dark_color, transparent_background, light_color
+    )
+    return output_path
+
+
+def _create_qr_with_logo(
+    qr,
+    center_image_path,
+    output_path,
+    scale,
+    border,
+    dark_color,
+    transparent_background,
+    light_color,
+):
+    """Create QR code with center logo - no conditional logic."""
+    with temp_qr_file() as temp_path:
         _save_qr_code(
             qr,
             temp_path,
@@ -82,19 +97,11 @@ def create_qr_code(
             transparent_background,
             light_color,
         )
-
         qr_img = Image.open(temp_path)
-        center_img = _prepare_center_image(
-            center_image_path,
-            qr_img.size,
-        )
-
+        center_img = _prepare_center_image(center_image_path, qr_img.size)
         final_img = _add_center_image(qr_img, center_img)
-        final_img.save(file_output_name)
-
-    finally:
-        _cleanup_temp_file(temp_path)
-    return file_output_name
+        final_img.save(output_path)
+    return output_path
 
 
 def _save_qr_code(
@@ -143,7 +150,12 @@ def _center(outer_dimension, inner_dimension):
     return (outer_dimension - inner_dimension) // 2
 
 
-def _cleanup_temp_file(temp_path):
-    """Clean up temporary file."""
-    if temp_path.exists():
-        temp_path.unlink()
+@contextmanager
+def temp_qr_file(path="temp_qr.png"):
+    """Context manager for temporary QR code file."""
+    temp_path = Path(path)
+    try:
+        yield temp_path
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()
