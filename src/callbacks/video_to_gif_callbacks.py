@@ -1,8 +1,8 @@
 import uuid_utils as uuid
-from taipy.gui import hold_control, notify, resume_control
+from taipy.gui import notify
 
 from algorithms.video_to_gif_functions import select_video, video_to_gif
-from taipy_utilities.taipy_callback import taipy_callback
+from taipy_utilities.taipy_callback import hold_control_during_execution, taipy_callback
 
 
 def _delete_file(content_path):
@@ -31,17 +31,10 @@ def select_video_callback(state):
         s.video_is_selected = True
 
 
-def _assert_gif_ready(state, file_output_name):
-    with state as s:
-        s.gif_is_ready = True
-        s.content_download = file_output_name
-        notify(s, "s", "GIF Generated Successfully!")
-
-
+@hold_control_during_execution(message="Generating GIF")
 @taipy_callback
 def convert_to_gif_callback(state):
     with state as s:
-        hold_control(s, message="Generating GIF")
         file_output_name = f"./deposit_files/{uuid.uuid4()}.gif"
 
         try:
@@ -58,4 +51,10 @@ def convert_to_gif_callback(state):
             notify(s, "e", str(e))
         finally:
             _clean_video_to_gif_parameters(state)
-            resume_control(state)
+
+
+def _assert_gif_ready(state, file_output_name):
+    with state as s:
+        s.gif_is_ready = True
+        s.content_download = file_output_name
+        notify(s, "s", "GIF Generated Successfully!")
