@@ -7,7 +7,8 @@ import ffmpeg
 def select_video(content: str):
     """Handles video selection and retrieves its properties."""
     content_path = Path(content)
-    video_duration = get_clip_duration(content)
+    clip_info = _get_clip_info(content)
+    video_duration = clip_info["duration"]
     file_size = _calculate_file_size(content_path)
     file_name = content_path.name
     return content_path, video_duration, file_size, file_name
@@ -27,26 +28,21 @@ def _calculate_file_size(content_path):
     return f"{size_bytes} B"
 
 
-def get_clip_duration(input_path: str) -> float:
-    """Gets the duration of a video file using ffprobe"""
+def _get_clip_info(input_path: str):
+    """Gets video information including duration and dimensions using ffprobe."""
     try:
-        return _get_clip_duration(input_path)
+        probe = ffmpeg.probe(input_path)
+        duration = float(probe["format"]["duration"])
+        width = int(probe["streams"][0]["width"])
+        height = int(probe["streams"][0]["height"])
+        return {"duration": duration, "size": (width, height)}
     except ffmpeg.Error as e:
         raise ValueError(
-            f"ffprobe error: Could not get duration for '{input_path}'.\
+            f"ffprobe error: Could not get info for '{input_path}'.\
                   {e.stderr.decode('utf8')}"
         ) from e
     except (FileNotFoundError, KeyError) as e:
-        raise ValueError(
-            f"Could not get duration. Is '{input_path}' a valid video file?"
-        ) from e
-
-
-def _get_clip_duration(input_path: str) -> float:
-    probe = ffmpeg.probe(input_path)
-    duration = float(probe["format"]["duration"])
-    print(f"Video duration: {duration:.2f} seconds")
-    return duration
+        raise ValueError(f"Could not get video info. Is '{input_path}' valid?") from e
 
 
 def video_to_gif(
@@ -60,8 +56,9 @@ def video_to_gif(
     try:
         _validate_input_file(input_path)
 
-        # Get duration first for validation
-        video_duration = get_clip_duration(input_path)
+        # Get clip info first for validation
+        clip_info = _get_clip_info(input_path)
+        video_duration = clip_info["duration"]
         _validate_parameters(start_time, duration, video_duration)
 
         _video_to_gif(
@@ -71,6 +68,7 @@ def video_to_gif(
             duration,
             fps,
             resize_factor,
+            clip_info,
         )
         return True
     except (ValueError, FileNotFoundError) as e:
@@ -80,13 +78,12 @@ def video_to_gif(
 def _video_to_gif(
     input_path: str,
     output_path: str,
-    start_time: float = 0,
-    duration: float = None,
-    fps: int = 10,
-    resize_factor: float = 1.0,
+    start_time: float,
+    duration: float,
+    fps: int,
+    resize_factor: float,
+    clip_info: dict,
 ):
-    _validate_input_file(input_path)
-    clip_info = _get_clip_info(input_path)
     _log_results(input_path, clip_info, fps)
     palette_path = _generate_palette(input_path, start_time, duration, resize_factor)
     _create_gif(
@@ -124,25 +121,11 @@ def _create_dir_if_not_exist(output_path: str):
     output_dir.mkdir(parents=True, exist_ok=True)
 
 
-def _get_clip_info(input_path: str):
-    try:
-        probe = ffmpeg.probe(input_path)
-        duration = float(probe["format"]["duration"])
-        width = int(probe["streams"][0]["width"])
-        height = int(probe["streams"][0]["height"])
-        return {"duration": duration, "size": (width, height)}
-    except ffmpeg.Error as e:
-        raise ValueError(
-            f"ffprobe error: Could not get info for '{input_path}'.\
-                  {e.stderr.decode('utf8')}"
-        )
-    except (FileNotFoundError, KeyError) as e:
-        raise ValueError(f"Could not get video info. Is '{input_path}' valid?") from e
-
-
 def _log_results(input_path: str, clip_info: dict, fps: int):
+    duration = clip_info["duration"]
     print(f"Converting '{input_path}' to GIF...")
-    print(f"Duration: {clip_info['duration']:.2f} seconds")
+    print(f"Video duration: {duration:.2f} seconds")
+    print(f"Duration: {duration:.2f} seconds")
     print(f"Size: {clip_info['size']}")
     print(f"FPS: {fps}")
 
