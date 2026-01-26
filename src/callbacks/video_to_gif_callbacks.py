@@ -1,8 +1,8 @@
 import uuid_utils as uuid
 from taipy.gui import notify
+from taipy_utils import hold_control_during_execution, taipy_callback
 
 from algorithms.video_to_gif_functions import select_video, video_to_gif
-from taipy_utilities.taipy_callback import hold_control_during_execution, taipy_callback
 
 
 def _delete_file(content_path):

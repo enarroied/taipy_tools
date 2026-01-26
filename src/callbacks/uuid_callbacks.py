@@ -1,5 +1,6 @@
+from taipy_utils import taipy_callback
+
 from algorithms.uuid_functions import get_uuid
-from taipy_utilities.taipy_callback import taipy_callback
 
 
 @taipy_callback

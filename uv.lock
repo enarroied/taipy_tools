@@ -1324,6 +1324,7 @@ dependencies = [
     { name = "pillow" },
     { name = "segno" },
     { name = "taipy" },
+    { name = "taipy-utils" },
     { name = "uuid-utils" },
 ]
 
@@ -1343,6 +1344,7 @@ requires-dist = [
     { name = "pillow", specifier = "==11.3.0" },
     { name = "segno", specifier = "==1.6.6" },
     { name = "taipy", specifier = "==4.1.0" },
+    { name = "taipy-utils", specifier = ">=0.1.1" },
     { name = "uuid-utils", specifier = "==0.11.0" },
 ]
 
@@ -1354,6 +1356,18 @@ dev = [
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "ruff", specifier = ">=0.14.10" },
     { name = "vulture", specifier = ">=2.14" },
+]
+
+[[package]]
+name = "taipy-utils"
+version = "0.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "taipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cc/56/980001316c21d256628394b3a24789f8cf0a156a61a7de31c9d36babe716/taipy_utils-0.1.1.tar.gz", hash = "sha256:ae61d9156eb2458faacc5c2584710c4403398bf1c77254673941743d41783a31", size = 129340, upload-time = "2026-01-26T18:41:36.072Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cc/e6/68aa6ee38101c10ddba00260bff7f4f4da45291f54e9e8f3259a05ffc53b/taipy_utils-0.1.1-py3-none-any.whl", hash = "sha256:cedeec9e13d0be9d5b29b0083b4c937649c21d19a2cd98a2468a60c1ff2ac648", size = 5156, upload-time = "2026-01-26T18:41:34.681Z" },
 ]
 
 [[package]]

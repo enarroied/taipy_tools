@@ -1,1 +1,0 @@
-from taipy_utilities.taipy_callback import taipy_callback as taipy_callback

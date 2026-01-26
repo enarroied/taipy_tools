@@ -1,8 +1,8 @@
 import uuid_utils as uuid
+from taipy_utils import taipy_callback
 
 from algorithms.qr_code_functions import generate_qr_code
 from context.qrcodeconfig import QRCodeConfig
-from taipy_utilities.taipy_callback import taipy_callback
 
 
 def state_to_qr_config(state) -> QRCodeConfig:
