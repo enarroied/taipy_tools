@@ -2,6 +2,7 @@ import tempfile
 from pathlib import Path
 
 import ffmpeg
+import uuid_utils as uuid
 
 
 def select_video(content: str):
@@ -47,14 +48,27 @@ def _get_clip_info(input_path: str):
 
 def video_to_gif(
     input_path: str,
-    output_path: str,
+    output_path: str = None,
+    output_dir: str = "./deposit_files",
     start_time: float = 0,
     duration: float = None,
     fps: int = 10,
     resize_factor: float = 1.0,
-) -> bool:
+) -> str:
+    """
+    Convert video to GIF.
+
+    Returns:
+        str: Path to the generated GIF file
+    """
     try:
         _validate_input_file(input_path)
+
+        # Generate output path if not provided
+        if output_path is None:
+            output_dir_path = Path(output_dir)
+            output_dir_path.mkdir(parents=True, exist_ok=True)
+            output_path = str(output_dir_path / f"{uuid.uuid4()}.gif")
 
         # Get clip info first for validation
         clip_info = _get_clip_info(input_path)
@@ -70,7 +84,7 @@ def video_to_gif(
             resize_factor,
             clip_info,
         )
-        return True
+        return output_path
     except (ValueError, FileNotFoundError) as e:
         raise ValueError(f"Error converting video to GIF: {str(e)}")
 

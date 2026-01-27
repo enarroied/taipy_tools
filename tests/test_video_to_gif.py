@@ -171,7 +171,7 @@ class TestVideoToGif:
     @patch("src.algorithms.video_to_gif_functions._generate_palette")
     @patch("src.algorithms.video_to_gif_functions._get_clip_info")
     @patch("src.algorithms.video_to_gif_functions._validate_input_file")
-    def test_returns_true_on_success(
+    def test_returns_output_path_on_success(
         self,
         mock_validate,
         mock_info,
@@ -186,7 +186,7 @@ class TestVideoToGif:
         mock_palette.return_value = Path("palette.png")
 
         result = video_to_gif(str(sample_video_file), str(output_gif_path))
-        assert result is True
+        assert result == str(output_gif_path)
 
     @patch("src.algorithms.video_to_gif_functions._validate_input_file")
     def test_raises_error_on_validation_error(
