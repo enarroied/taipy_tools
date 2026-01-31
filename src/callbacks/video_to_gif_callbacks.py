@@ -16,7 +16,7 @@ def select_video_callback(state):
 
 @hold_control_during_execution(message="Generating GIF")
 @taipy_callback
-def convert_to_gif_callback(state):
+def convert_video_to_gif_callback(state):
     with state as s:
         try:
             output_path = convert_video_to_gif(

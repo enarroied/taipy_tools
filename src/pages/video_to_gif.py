@@ -2,7 +2,7 @@ import taipy.gui.builder as tgb
 
 import taipy_utilities.builder_extension as tgb_ext
 from callbacks.video_to_gif_callbacks import (
-    convert_to_gif_callback,
+    convert_video_to_gif_callback,
     select_video_callback,
 )
 
@@ -41,7 +41,7 @@ with tgb.Page() as video_gif_page:
                     tgb.slider("{fps}", lov=[5, 7, 10, 15, 20, 25, 30, 35])
             tgb_ext.fullwidth_button(
                 label="Convert to GIF!",
-                on_action=convert_to_gif_callback,
+                on_action=convert_video_to_gif_callback,
             )
 
         with tgb.part(render="{gif_is_ready}"):
