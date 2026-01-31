@@ -4,6 +4,7 @@ from unittest.mock import patch
 import ffmpeg
 import pytest
 
+from context.videotogifconfig import VideoToGifConfig
 from src.algorithms.video_to_gif_functions import (
     _cleanup_file,
     _create_dir_if_not_exist,
@@ -181,11 +182,14 @@ class TestVideoToGif:
         sample_video_file,
         output_gif_path,
     ):
-        """Test that function returns True on success."""
+        """Test that function returns output path on success."""
         mock_info.return_value = {"duration": 10.0, "size": (1920, 1080)}
         mock_palette.return_value = Path("palette.png")
 
-        result = convert_video_to_gif(str(sample_video_file), str(output_gif_path))
+        config = VideoToGifConfig(
+            input_path=str(sample_video_file), output_path=str(output_gif_path)
+        )
+        result = convert_video_to_gif(config)
         assert result == str(output_gif_path)
 
     @patch("src.algorithms.video_to_gif_functions._validate_input_file")
@@ -195,8 +199,11 @@ class TestVideoToGif:
         """Test that function raises error when validation fails."""
         mock_validate.side_effect = FileNotFoundError("File not found")
 
+        config = VideoToGifConfig(
+            input_path=str(sample_video_file), output_path=str(output_gif_path)
+        )
         with pytest.raises(ValueError, match="Error converting video to GIF"):
-            convert_video_to_gif(str(sample_video_file), str(output_gif_path))
+            convert_video_to_gif(config)
 
     @patch("src.algorithms.video_to_gif_functions._cleanup_file")
     @patch("src.algorithms.video_to_gif_functions._create_gif")
@@ -217,7 +224,10 @@ class TestVideoToGif:
         mock_info.return_value = {"duration": 10.0, "size": (1920, 1080)}
         mock_palette.return_value = Path("palette.png")
 
-        convert_video_to_gif(str(sample_video_file), str(output_gif_path))
+        config = VideoToGifConfig(
+            input_path=str(sample_video_file), output_path=str(output_gif_path)
+        )
+        convert_video_to_gif(config)
         mock_validate.assert_called_with(str(sample_video_file))
 
     @patch("src.algorithms.video_to_gif_functions._cleanup_file")
@@ -239,7 +249,10 @@ class TestVideoToGif:
         mock_info.return_value = {"duration": 10.0, "size": (1920, 1080)}
         mock_palette.return_value = Path("palette.png")
 
-        convert_video_to_gif(str(sample_video_file), str(output_gif_path))
+        config = VideoToGifConfig(
+            input_path=str(sample_video_file), output_path=str(output_gif_path)
+        )
+        convert_video_to_gif(config)
         mock_info.assert_called_once_with(str(sample_video_file))
 
     @patch("src.algorithms.video_to_gif_functions._cleanup_file")
@@ -262,5 +275,68 @@ class TestVideoToGif:
         palette_path = Path("palette.png")
         mock_palette.return_value = palette_path
 
-        convert_video_to_gif(str(sample_video_file), str(output_gif_path))
+        config = VideoToGifConfig(
+            input_path=str(sample_video_file), output_path=str(output_gif_path)
+        )
+        convert_video_to_gif(config)
         mock_cleanup.assert_called_once_with(palette_path)
+
+    @patch("src.algorithms.video_to_gif_functions._cleanup_file")
+    @patch("src.algorithms.video_to_gif_functions._create_gif")
+    @patch("src.algorithms.video_to_gif_functions._generate_palette")
+    @patch("src.algorithms.video_to_gif_functions._get_clip_info")
+    @patch("src.algorithms.video_to_gif_functions._validate_input_file")
+    def test_uses_default_output_path(
+        self,
+        mock_validate,
+        mock_info,
+        mock_palette,
+        mock_create,
+        mock_cleanup,
+        sample_video_file,
+    ):
+        """Test that default output path is generated when not provided."""
+        mock_info.return_value = {"duration": 10.0, "size": (1920, 1080)}
+        mock_palette.return_value = Path("palette.png")
+
+        config = VideoToGifConfig(input_path=str(sample_video_file))
+        result = convert_video_to_gif(config)
+
+        # Result should be a path in the default output directory
+        assert result.endswith(".gif")
+        assert "deposit_files" in result
+
+    @patch("src.algorithms.video_to_gif_functions._cleanup_file")
+    @patch("src.algorithms.video_to_gif_functions._create_gif")
+    @patch("src.algorithms.video_to_gif_functions._generate_palette")
+    @patch("src.algorithms.video_to_gif_functions._get_clip_info")
+    @patch("src.algorithms.video_to_gif_functions._validate_input_file")
+    def test_uses_custom_parameters(
+        self,
+        mock_validate,
+        mock_info,
+        mock_palette,
+        mock_create,
+        mock_cleanup,
+        sample_video_file,
+        output_gif_path,
+    ):
+        """Test that custom parameters are used."""
+        mock_info.return_value = {"duration": 10.0, "size": (1920, 1080)}
+        mock_palette.return_value = Path("palette.png")
+
+        config = VideoToGifConfig(
+            input_path=str(sample_video_file),
+            output_path=str(output_gif_path),
+            start_time=2.0,
+            duration=5.0,
+            fps=15,
+            resize_factor=0.5,
+        )
+        convert_video_to_gif(config)
+
+        # Verify the config values were passed through
+        assert config.start_time == 2.0
+        assert config.duration == 5.0
+        assert config.fps == 15
+        assert config.resize_factor == 0.5

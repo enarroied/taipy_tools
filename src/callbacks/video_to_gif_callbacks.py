@@ -2,6 +2,18 @@ from taipy.gui import notify
 from taipy_utils import hold_control_during_execution, taipy_callback
 
 from algorithms.video_to_gif_functions import convert_video_to_gif, select_video
+from context.videotogifconfig import VideoToGifConfig
+
+
+def state_to_video_gif_config(state) -> VideoToGifConfig:
+    """Convert flat state variables to VideoToGifConfig dataclass"""
+    return VideoToGifConfig(
+        input_path=state.content,
+        start_time=state.start_time,
+        duration=state.duration,
+        fps=int(state.fps),
+        resize_factor=state.resize_factor,
+    )
 
 
 @taipy_callback
@@ -19,13 +31,8 @@ def select_video_callback(state):
 def convert_video_to_gif_callback(state):
     with state as s:
         try:
-            output_path = convert_video_to_gif(
-                input_path=s.content,
-                start_time=s.start_time,
-                duration=s.duration,
-                fps=int(s.fps),
-                resize_factor=s.resize_factor,
-            )
+            config = state_to_video_gif_config(s)
+            output_path = convert_video_to_gif(config)
             _assert_gif_ready(s, output_path)
         except ValueError as e:
             notify(s, "e", str(e))
