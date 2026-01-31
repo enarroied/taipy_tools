@@ -9,7 +9,7 @@ from src.algorithms.video_to_gif_functions import (
     _create_dir_if_not_exist,
     _get_clip_info,
     _validate_input_file,
-    video_to_gif,
+    convert_video_to_gif,
 )
 
 
@@ -185,7 +185,7 @@ class TestVideoToGif:
         mock_info.return_value = {"duration": 10.0, "size": (1920, 1080)}
         mock_palette.return_value = Path("palette.png")
 
-        result = video_to_gif(str(sample_video_file), str(output_gif_path))
+        result = convert_video_to_gif(str(sample_video_file), str(output_gif_path))
         assert result == str(output_gif_path)
 
     @patch("src.algorithms.video_to_gif_functions._validate_input_file")
@@ -196,7 +196,7 @@ class TestVideoToGif:
         mock_validate.side_effect = FileNotFoundError("File not found")
 
         with pytest.raises(ValueError, match="Error converting video to GIF"):
-            video_to_gif(str(sample_video_file), str(output_gif_path))
+            convert_video_to_gif(str(sample_video_file), str(output_gif_path))
 
     @patch("src.algorithms.video_to_gif_functions._cleanup_file")
     @patch("src.algorithms.video_to_gif_functions._create_gif")
@@ -217,7 +217,7 @@ class TestVideoToGif:
         mock_info.return_value = {"duration": 10.0, "size": (1920, 1080)}
         mock_palette.return_value = Path("palette.png")
 
-        video_to_gif(str(sample_video_file), str(output_gif_path))
+        convert_video_to_gif(str(sample_video_file), str(output_gif_path))
         mock_validate.assert_called_with(str(sample_video_file))
 
     @patch("src.algorithms.video_to_gif_functions._cleanup_file")
@@ -239,7 +239,7 @@ class TestVideoToGif:
         mock_info.return_value = {"duration": 10.0, "size": (1920, 1080)}
         mock_palette.return_value = Path("palette.png")
 
-        video_to_gif(str(sample_video_file), str(output_gif_path))
+        convert_video_to_gif(str(sample_video_file), str(output_gif_path))
         mock_info.assert_called_once_with(str(sample_video_file))
 
     @patch("src.algorithms.video_to_gif_functions._cleanup_file")
@@ -262,5 +262,5 @@ class TestVideoToGif:
         palette_path = Path("palette.png")
         mock_palette.return_value = palette_path
 
-        video_to_gif(str(sample_video_file), str(output_gif_path))
+        convert_video_to_gif(str(sample_video_file), str(output_gif_path))
         mock_cleanup.assert_called_once_with(palette_path)

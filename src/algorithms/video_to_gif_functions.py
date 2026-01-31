@@ -15,20 +15,6 @@ def select_video(content: str):
     return content_path, video_duration, file_size, file_name
 
 
-def _calculate_file_size(content_path):
-    """Calculates the size of the file in a human-readable format."""
-    if not content_path.is_file():
-        return " - "
-
-    size_bytes = content_path.stat().st_size
-
-    for factor, suffix in [(1024**3, "GB"), (1024**2, "MB"), (1024, "KB")]:
-        if size_bytes >= factor:
-            return f"{size_bytes / factor:.2f} {suffix}"
-
-    return f"{size_bytes} B"
-
-
 def _get_clip_info(input_path: str):
     """Gets video information including duration and dimensions using ffprobe."""
     try:
@@ -46,7 +32,21 @@ def _get_clip_info(input_path: str):
         raise ValueError(f"Could not get video info. Is '{input_path}' valid?") from e
 
 
-def video_to_gif(
+def _calculate_file_size(content_path):
+    """Calculates the size of the file in a human-readable format."""
+    if not content_path.is_file():
+        return " - "
+
+    size_bytes = content_path.stat().st_size
+
+    for factor, suffix in [(1024**3, "GB"), (1024**2, "MB"), (1024, "KB")]:
+        if size_bytes >= factor:
+            return f"{size_bytes / factor:.2f} {suffix}"
+
+    return f"{size_bytes} B"
+
+
+def convert_video_to_gif(
     input_path: str,
     output_path: str = None,
     output_dir: str = "./deposit_files",
@@ -74,7 +74,7 @@ def video_to_gif(
         video_duration = clip_info["duration"]
         _validate_parameters(start_time, duration, video_duration)
 
-        _video_to_gif(
+        _convert_video_to_gif(
             input_path,
             output_path,
             start_time,
@@ -88,7 +88,7 @@ def video_to_gif(
         raise ValueError(f"Error converting video to GIF: {str(e)}")
 
 
-def _video_to_gif(
+def _convert_video_to_gif(
     input_path: str,
     output_path: str,
     start_time: float,
