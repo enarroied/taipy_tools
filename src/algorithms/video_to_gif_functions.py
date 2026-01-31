@@ -64,7 +64,6 @@ def video_to_gif(
     try:
         _validate_input_file(input_path)
 
-        # Generate output path if not provided
         if output_path is None:
             output_dir_path = Path(output_dir)
             output_dir_path.mkdir(parents=True, exist_ok=True)

@@ -14,7 +14,6 @@ def select_video_callback(state):
         s.video_is_selected = True
 
 
-# GUI callback (clean and simple)
 @hold_control_during_execution(message="Generating GIF")
 @taipy_callback
 def convert_to_gif_callback(state):
