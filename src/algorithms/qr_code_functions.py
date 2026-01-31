@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-from dataclasses import asdict
 from pathlib import Path
 
 import segno
@@ -8,9 +7,7 @@ from PIL import Image
 from context.qrcodeconfig import QRCodeConfig
 
 
-def generate_qr_code(
-    config: QRCodeConfig,
-) -> str:
+def generate_qr_code(config: QRCodeConfig) -> str:
     """
     Generate a QR code image from a message with optional logo and styling.
     Args:
@@ -18,98 +15,55 @@ def generate_qr_code(
     Returns:
         str: Path to the generated QR code image
     """
-    message = config.message
-    if len(message) > 1500:
+    if len(config.message) > 1500:
         raise ValueError("Text too long")
 
-    if not message.strip():
+    if not config.message.strip():
         raise ValueError("Message cannot be empty")
 
-    create_qr_code(**asdict(config))
+    create_qr_code(config)
     return config.file_output_name
 
 
-def create_qr_code(
-    message,
-    add_logo=None,
-    dark_color="black",
-    light_color="white",
-    transparent_background=False,
-    scale=8,
-    border=4,
-    file_output_name="qr_code.png",
-):
+def create_qr_code(config: QRCodeConfig):
     """Create a QR code with optional center image and custom styling."""
-    qr = segno.make(message, error="H")
-    center_image_path = "./img/logo.png" if add_logo else None
+    qr = segno.make(config.message, error="H")
+    center_image_path = "./img/logo.png" if config.add_logo else None
 
     if not center_image_path or not Path(center_image_path).exists():
-        return _create_simple_qr(
-            qr,
-            file_output_name,
-            scale,
-            border,
-            dark_color,
-            transparent_background,
-            light_color,
-        )
+        return _create_simple_qr(qr, config)
 
-    return _create_qr_with_logo(
-        qr,
-        center_image_path,
-        file_output_name,
-        scale,
-        border,
-        dark_color,
-        transparent_background,
-        light_color,
-    )
+    return _create_qr_with_logo(qr, center_image_path, config)
 
 
-def _create_simple_qr(
-    qr, output_path, scale, border, dark_color, transparent_background, light_color
-):
+def _create_simple_qr(qr, config: QRCodeConfig):
     """Create QR code without logo - no conditional logic."""
-    _save_qr_code(
-        qr, output_path, scale, border, dark_color, transparent_background, light_color
-    )
-    return output_path
+    _save_qr_code(qr, config)
+    return config.file_output_name
 
 
-def _create_qr_with_logo(
-    qr,
-    center_image_path,
-    output_path,
-    scale,
-    border,
-    dark_color,
-    transparent_background,
-    light_color,
-):
+def _create_qr_with_logo(qr, center_image_path, config: QRCodeConfig):
     """Create QR code with center logo - no conditional logic."""
     with temp_qr_file() as temp_path:
-        _save_qr_code(
-            qr,
-            temp_path,
-            scale,
-            border,
-            dark_color,
-            transparent_background,
-            light_color,
-        )
+        _save_qr_code(qr, config, temp_path)
         qr_img = Image.open(temp_path)
         center_img = _prepare_center_image(center_image_path, qr_img.size)
         final_img = _add_center_image(qr_img, center_img)
-        final_img.save(output_path)
-    return output_path
+        final_img.save(config.file_output_name)
+    return config.file_output_name
 
 
-def _save_qr_code(
-    qr, path, scale, border, dark_color, transparent_background, light_color
-):
-    """Save QR code to temporary file."""
-    background = None if transparent_background else light_color
-    qr.save(path, scale=scale, border=border, dark=dark_color, light=background)
+def _save_qr_code(qr, config: QRCodeConfig, path=None):
+    """Save QR code to file."""
+    output_path = path or config.file_output_name
+    background = None if config.transparent_background else config.light_color
+    qr.save(
+        output_path,
+        scale=config.scale,
+        border=config.border,
+        dark=config.dark_color,
+        light=background,
+    )
 
 
 def _prepare_center_image(center_image_path, qr_size):

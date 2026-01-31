@@ -35,23 +35,27 @@ class TestBasicQRCreation:
 
     def test_creates_qr_code_file(self, qr_output_path):
         """Test that QR code file is created."""
-        create_qr_code("test data", file_output_name=str(qr_output_path))
+        config = QRCodeConfig(message="test data", file_output_name=str(qr_output_path))
+        create_qr_code(config)
         assert qr_output_path.exists()
 
     def test_returns_output_path(self, qr_output_path):
         """Test that function returns the output path."""
-        result = create_qr_code("test data", file_output_name=str(qr_output_path))
+        config = QRCodeConfig(message="test data", file_output_name=str(qr_output_path))
+        result = create_qr_code(config)
         assert result == str(qr_output_path)
 
     def test_creates_valid_image(self, qr_output_path):
         """Test that created file is a valid image."""
-        create_qr_code("test data", file_output_name=str(qr_output_path))
+        config = QRCodeConfig(message="test data", file_output_name=str(qr_output_path))
+        create_qr_code(config)
         img = Image.open(qr_output_path)
         assert img is not None
 
     def test_default_output_path(self):
         """Test QR code creation with default output path."""
-        result = create_qr_code("test data")
+        config = QRCodeConfig(message="test data")
+        result = create_qr_code(config)
         try:
             assert Path(result).exists()
         finally:
@@ -105,11 +109,12 @@ class TestQRWithCenterImage:
             img = Image.open(sample_center_image)
             img.save(logo_path)
 
-            create_qr_code(
-                "test data",
+            config = QRCodeConfig(
+                message="test data",
                 file_output_name=str(qr_output_path),
                 add_logo=True,
             )
+            create_qr_code(config)
             assert qr_output_path.exists()
         finally:
             # Clean up
@@ -120,20 +125,22 @@ class TestQRWithCenterImage:
 
     def test_handles_missing_center_image(self, qr_output_path):
         """Test graceful handling when center image doesn't exist."""
-        create_qr_code(
-            "test data",
+        config = QRCodeConfig(
+            message="test data",
             file_output_name=str(qr_output_path),
             add_logo=True,  # Logo path won't exist
         )
+        create_qr_code(config)
         assert qr_output_path.exists()
 
     def test_handles_none_center_image(self, qr_output_path):
         """Test handling when add_logo is False."""
-        create_qr_code(
-            "test data",
+        config = QRCodeConfig(
+            message="test data",
             file_output_name=str(qr_output_path),
             add_logo=False,
         )
+        create_qr_code(config)
         assert qr_output_path.exists()
 
     def test_temp_file_cleaned_up(self, qr_output_path, sample_center_image):
@@ -145,11 +152,12 @@ class TestQRWithCenterImage:
             img = Image.open(sample_center_image)
             img.save(logo_path)
 
-            create_qr_code(
-                "test data",
+            config = QRCodeConfig(
+                message="test data",
                 file_output_name=str(qr_output_path),
                 add_logo=True,
             )
+            create_qr_code(config)
             assert not Path("temp_qr.png").exists()
         finally:
             if logo_path.exists():
@@ -163,37 +171,46 @@ class TestCustomStyling:
 
     def test_custom_dark_color(self, qr_output_path):
         """Test QR code with custom dark color."""
-        create_qr_code(
-            "test data", file_output_name=str(qr_output_path), dark_color="red"
+        config = QRCodeConfig(
+            message="test data", file_output_name=str(qr_output_path), dark_color="red"
         )
+        create_qr_code(config)
         assert qr_output_path.exists()
 
     def test_custom_light_color(self, qr_output_path):
         """Test QR code with custom light color."""
-        create_qr_code(
-            "test data",
+        config = QRCodeConfig(
+            message="test data",
             file_output_name=str(qr_output_path),
             light_color="yellow",
         )
+        create_qr_code(config)
         assert qr_output_path.exists()
 
     def test_transparent_background(self, qr_output_path):
         """Test QR code with transparent background."""
-        create_qr_code(
-            "test data",
+        config = QRCodeConfig(
+            message="test data",
             file_output_name=str(qr_output_path),
             transparent_background=True,
         )
+        create_qr_code(config)
         assert qr_output_path.exists()
 
     def test_custom_scale(self, qr_output_path):
         """Test QR code with custom scale."""
-        create_qr_code("test data", file_output_name=str(qr_output_path), scale=10)
+        config = QRCodeConfig(
+            message="test data", file_output_name=str(qr_output_path), scale=10
+        )
+        create_qr_code(config)
         assert qr_output_path.exists()
 
     def test_custom_border(self, qr_output_path):
         """Test QR code with custom border."""
-        create_qr_code("test data", file_output_name=str(qr_output_path), border=2)
+        config = QRCodeConfig(
+            message="test data", file_output_name=str(qr_output_path), border=2
+        )
+        create_qr_code(config)
         assert qr_output_path.exists()
 
 
@@ -347,8 +364,8 @@ class TestQRCodeIntegration:
             img = Image.open(sample_center_image)
             img.save(logo_path)
 
-            create_qr_code(
-                "https://example.com",
+            config = QRCodeConfig(
+                message="https://example.com",
                 file_output_name=str(qr_output_path),
                 add_logo=True,
                 dark_color="blue",
@@ -357,6 +374,7 @@ class TestQRCodeIntegration:
                 scale=10,
                 border=2,
             )
+            create_qr_code(config)
             assert qr_output_path.exists()
         finally:
             if logo_path.exists():
@@ -369,8 +387,11 @@ class TestQRCodeIntegration:
         path1 = tmp_path / "qr1.png"
         path2 = tmp_path / "qr2.png"
 
-        create_qr_code("data1", file_output_name=str(path1))
-        create_qr_code("data2", file_output_name=str(path2))
+        config1 = QRCodeConfig(message="data1", file_output_name=str(path1))
+        config2 = QRCodeConfig(message="data2", file_output_name=str(path2))
+
+        create_qr_code(config1)
+        create_qr_code(config2)
 
         assert path1.exists()
 
@@ -379,15 +400,21 @@ class TestQRCodeIntegration:
         path1 = tmp_path / "qr1.png"
         path2 = tmp_path / "qr2.png"
 
-        create_qr_code("data1", file_output_name=str(path1))
-        create_qr_code("data2", file_output_name=str(path2))
+        config1 = QRCodeConfig(message="data1", file_output_name=str(path1))
+        config2 = QRCodeConfig(message="data2", file_output_name=str(path2))
+
+        create_qr_code(config1)
+        create_qr_code(config2)
 
         assert path2.exists()
 
     def test_overwrites_existing_file(self, qr_output_path):
         """Test that existing file is overwritten."""
-        create_qr_code("first", file_output_name=str(qr_output_path))
-        create_qr_code(
-            "second data with more content", file_output_name=str(qr_output_path)
+        config1 = QRCodeConfig(message="first", file_output_name=str(qr_output_path))
+        config2 = QRCodeConfig(
+            message="second data with more content",
+            file_output_name=str(qr_output_path),
         )
+        create_qr_code(config1)
+        create_qr_code(config2)
         assert qr_output_path.exists()
